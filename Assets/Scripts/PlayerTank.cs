@@ -21,7 +21,7 @@ public class PlayerTank : MonoBehaviour {
         playerCamera = FindFirstObjectByType<Camera>();
     }
 
-    private void Update() {
+    /*private void Update() {
         var camPos = playerCamera.transform.position;
         float camPosLerpFactor = 2.0f * Time.deltaTime;
         playerCamera.transform.position = new(Mathf.Lerp(camPos.x,transform.position.x,camPosLerpFactor),camPos.y,Mathf.Lerp(camPos.z,transform.position.z,camPosLerpFactor));
@@ -50,5 +50,5 @@ public class PlayerTank : MonoBehaviour {
             bullet.GetComponent<Bullet>().owner = gameObject;
             bullet.GetComponent<Rigidbody>().AddForce(20.0f * cannon.forward,ForceMode.VelocityChange);
         }
-    }
+    }*/
 }
