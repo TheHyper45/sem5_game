@@ -8,19 +8,30 @@ public class SaveFileMenu : MonoBehaviour {
     [SerializeField]
     private MainMenu mainMenu;
     [SerializeField]
-    private LevelSelectionMenu levelSelectionMenu;
-    [SerializeField]
     private Button goBackButton;
     [SerializeField]
     private Button createNewSaveButton;
     [SerializeField]
     private TMP_InputField saveFileNameInput;
     [SerializeField]
-    private LevelSaveElement levelSaveElementPrefab;
+    private SaveFileInstance saveFileInstancePrefab;
     [SerializeField]
     private Transform levelSaveElementParent;
     [SerializeField]
     private TMP_Text errorText;
+
+    private void CreateNewSaveFile(string fileName) {
+        var filePath = Path.Combine(Application.persistentDataPath,$"{fileName}.json");
+        File.WriteAllText(filePath,"{}");
+        SaveFileInstance element = Instantiate(saveFileInstancePrefab,levelSaveElementParent);
+        try {
+            element.Init(filePath);
+        }
+        catch(Exception) {
+            Destroy(element);
+            throw new Exception("File doesn't exist or filesystem error.");
+        }
+    }
 
     private void Awake() {
         goBackButton.onClick.AddListener(() => {
@@ -37,28 +48,13 @@ public class SaveFileMenu : MonoBehaviour {
                 errorText.text = "File already exists.";
                 return;
             }
-            var fileName = $"{saveFileNameInput.text}.json";
-            var filePath = Path.Combine(Application.persistentDataPath,fileName);
             try {
-                File.WriteAllText(filePath,"{}");
+                CreateNewSaveFile(saveFileNameInput.text);
             }
-            catch(ArgumentException) {
-                errorText.text = "Invalid file name.";
-                return;
+            catch(Exception error) {
+                errorText.text = error.Message;
             }
-            catch(PathTooLongException) {
-                errorText.text = "File name too long.";
-                return;
-            }
-            catch(NotSupportedException) {
-                errorText.text = "Invalid file name.";
-                return;
-            }
-            catch(IOException) {
-                errorText.text = "Invalid file name.";
-                return;
-            }
-            Instantiate(levelSaveElementPrefab,levelSaveElementParent).Init(filePath,this,levelSelectionMenu);
+            saveFileNameInput.text = "";
         });
     }
 
@@ -70,8 +66,14 @@ public class SaveFileMenu : MonoBehaviour {
         }
         foreach(var filePath in Directory.EnumerateFiles(Application.persistentDataPath)) {
             if(Path.GetExtension(filePath) == ".json") {
-                var element = Instantiate(levelSaveElementPrefab,levelSaveElementParent);
-                element.Init(filePath,this,levelSelectionMenu);
+                var element = Instantiate(saveFileInstancePrefab,levelSaveElementParent);
+                try {
+                    element.Init(filePath);
+                }
+                catch(Exception) {
+                    Destroy(element);
+                    errorText.text = "File doesn't exist or filesystem error.";
+                }
             }
         }
     }
