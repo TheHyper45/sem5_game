@@ -11,11 +11,11 @@ public class MainMenu : MonoBehaviour {
     [SerializeField]
     private SettingsMenu settingMenu;
     [SerializeField]
-    private SaveFileMenu saveFileMenu;
+    private PlayMenu playMenu;
 
     private void Awake() {
         playButton.onClick.AddListener(() => {
-            saveFileMenu.gameObject.SetActive(true);
+            playMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
         settingsButton.onClick.AddListener(() => {

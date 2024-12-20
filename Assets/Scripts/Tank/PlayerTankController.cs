@@ -14,38 +14,36 @@ public class PlayerTankController : MonoBehaviour {
     private float towerRotateSpeed,gunAdjustSpeed;
     [SerializeField]
     private Animator rightTreadAnimation,leftTreadAnimation;
+    [SerializeField]
+    private float gunRoundsPerSecond;
+    [SerializeField]
+    private Vector3 cameraRelativePosition;
+    [SerializeField]
+    private Vector3 cameraRelativeLookAtPoint;
 
     private new Rigidbody rigidbody;
-    private Vector3 cameraOffset;
 
     private readonly Quaternion towerAdjustRotation = Quaternion.Euler(90f,0f,0f);
-    private readonly RaycastHit[] towerTargetHits = new RaycastHit[1];
-    private Vector3 towerTargetPoint = new();
 
     private void Awake() {
         rigidbody = GetComponent<Rigidbody>();
-        cameraOffset = transform.position - 8f * transform.forward + 13f * transform.up + 10f * transform.right;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update() {
-        float mouseMovementX = Input.GetAxis("Mouse X") * 100.0f * Time.deltaTime;
-        cameraOffset = Quaternion.AngleAxis(mouseMovementX,Vector3.up) * cameraOffset;
-        Camera.main.transform.position = transform.position + cameraOffset;
-        Camera.main.transform.LookAt(transform.position + 8f * transform.up);
-
-        if(!Input.GetKey(KeyCode.LeftShift)) {
-            var towerRotation = Quaternion.LookRotation(new Vector3(towerTargetPoint.x,tower.position.y,towerTargetPoint.z) - tower.position);
-            tower.rotation = Quaternion.Slerp(tower.rotation,towerRotation * towerAdjustRotation,Time.deltaTime * towerRotateSpeed);
-            float gunAngle = Mathf.Tan((gun.position.y - towerTargetPoint.y) / Vector3.Distance(gun.position,towerTargetPoint));
-            gunAngle = Mathf.Clamp(gunAngle * Mathf.Rad2Deg,-10f,10f);
-            gun.localRotation = Quaternion.Slerp(gun.localRotation,Quaternion.Euler(gunAngle,0f,0f),Time.deltaTime * gunAdjustSpeed);
+        if(Cursor.lockState == CursorLockMode.Locked) {
+            var mouseMovementX = Input.GetAxis("Mouse X") * 100.0f * Time.deltaTime;
+            var cameraRotateY = Quaternion.AngleAxis(mouseMovementX,Vector3.up);
+            cameraRelativePosition = cameraRotateY * cameraRelativePosition;
+            cameraRelativeLookAtPoint = cameraRotateY * cameraRelativeLookAtPoint;
+            Camera.main.transform.position = tower.position + cameraRelativePosition;
+            Camera.main.transform.LookAt(tower.position + cameraRelativeLookAtPoint);
+            var towerTargetRotation = Quaternion.LookRotation(new(cameraRelativeLookAtPoint.x,0f,cameraRelativeLookAtPoint.z),transform.up) * towerAdjustRotation;
+            tower.rotation = Quaternion.Slerp(tower.rotation,towerTargetRotation,3f * Time.deltaTime);
         }
-
-        /*if(Input.GetKeyDown(KeyCode.Mouse0)) {
-            var bullet = Instantiate(bulletPrefab,bulletSpawnPoint.position,Quaternion.identity);
-            bullet.Rigidbody.AddForce(bulletSpawnPoint.forward * 100f,ForceMode.VelocityChange);
-        }*/
+        if(Input.GetKeyDown(KeyCode.Mouse0)) {
+            Instantiate(bulletPrefab,bulletSpawnPoint.position,bulletSpawnPoint.rotation).Init();
+        }
     }
 
     private void FixedUpdate() {
@@ -71,11 +69,6 @@ public class PlayerTankController : MonoBehaviour {
             transform.rotation.eulerAngles.z
         ));
 
-        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if(Physics.RaycastNonAlloc(ray,towerTargetHits,200f) > 0) {
-            towerTargetPoint = towerTargetHits[0].point;
-        }
-
         float rightThreadAnimationSpeed = 0f;
         float leftThreadAnimationSpeed = 0f;
         if(inputMoveDirection == 0f && inputTurnDirection != 0f) {
@@ -87,8 +80,8 @@ public class PlayerTankController : MonoBehaviour {
             leftThreadAnimationSpeed = inputMoveDirection * moveSpeed;
         }
         else if(inputMoveDirection != 0f && inputTurnDirection != 0f) {
-            rightThreadAnimationSpeed = (inputTurnDirection > 0f ? 0.5f : 1.0f) * inputMoveDirection * moveSpeed;
-            leftThreadAnimationSpeed = (inputTurnDirection < 0f ? 0.5f : 1.0f) * inputMoveDirection * moveSpeed;
+            rightThreadAnimationSpeed = (inputTurnDirection > 0f ? 0.75f : 1.0f) * inputMoveDirection * moveSpeed;
+            leftThreadAnimationSpeed = (inputTurnDirection < 0f ? 0.75f : 1.0f) * inputMoveDirection * moveSpeed;
         }
         rightTreadAnimation.SetFloat("MoveSpeed",rightThreadAnimationSpeed);
         leftTreadAnimation.SetFloat("MoveSpeed",leftThreadAnimationSpeed);
