@@ -13,8 +13,8 @@ TagManager:
   - UI
   - Player
   - Enemy
-  - PlayerBullet
-  - EnemyBullet
+  - Bullet
+  - Ground
   - 
   - 
   - 

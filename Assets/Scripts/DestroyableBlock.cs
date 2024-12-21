@@ -3,33 +3,20 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class DestroyableBlock : MonoBehaviour {
     [SerializeField]
-    private GameObject[] fragments;
+    private int maxHealth;
+    [SerializeField]
+    private SimpleRagdoll destroyedPrefab;
 
-    private BoxCollider boxCollider;
-    private bool startTimer = false;
-    private float timer = 0f;
+    public int health;
 
     private void Awake() {
-        boxCollider = GetComponent<BoxCollider>();
+        health = maxHealth;
     }
 
-    private void Update() {
-        if(!startTimer) return;
-        timer += Time.deltaTime;
-        if(timer >= 5f) {
-            Destroy(gameObject);
-        }
-    }
-
-    public void Init(Vector3 startPoint,float pushForce) {
-        if(startTimer) return;
-        boxCollider.enabled = false;
-        startTimer = true;
-        foreach(var fragment in fragments) {
-            fragment.GetComponent<BoxCollider>().enabled = true;
-            var rigidbody = fragment.AddComponent<Rigidbody>();
-            var dir = rigidbody.transform.position - startPoint;
-            rigidbody.AddForce(dir * pushForce,ForceMode.VelocityChange);
-        }
+    public void Hit(Vector3 direction,float force) {
+        health -= 1;
+        if(health > 0) return;
+        Instantiate(destroyedPrefab,transform.position,Quaternion.identity).Init(direction,force);
+        Destroy(gameObject);
     }
 }
