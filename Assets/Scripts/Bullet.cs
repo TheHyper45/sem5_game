@@ -2,15 +2,15 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour {
-    private DrivableTank parentDrivableTank;
+    private int damage;
     private new Rigidbody rigidbody;
-    public new Collider collider;
     private bool startTimer = false;
     private float timer = 0f;
+    public Collider Collider { get; private set; }
 
     private void Awake() {
         rigidbody = GetComponent<Rigidbody>();
-        collider = GetComponent<Collider>();
+        Collider = GetComponent<Collider>();
     }
 
     private void Update() {
@@ -19,25 +19,28 @@ public class Bullet : MonoBehaviour {
         if(timer >= 5f) Destroy(gameObject);
     }
 
-    public void Init(DrivableTank tank,Collider[] parentIgnoreColliders) {
+    public void Init(int _damage,Collider[] parentIgnoreColliders) {
         if(startTimer) return;
-        parentDrivableTank = tank;
+        damage = _damage;
         startTimer = true;
         rigidbody.AddForce(transform.forward * 60f,ForceMode.VelocityChange);
         foreach(var parentCollider in parentIgnoreColliders) {
-            Physics.IgnoreCollision(collider,parentCollider);
+            Physics.IgnoreCollision(Collider,parentCollider);
         }
     }
 
     private void OnCollisionEnter(Collision collision) {
         var topParent = collision.gameObject.transform.root;
-        if(topParent.TryGetComponent(out DrivableTank drivableTank)) {
-            drivableTank.Hit(parentDrivableTank.bulletDamage);
+        if(topParent.TryGetComponent(out DrivableGameUnit drivableGameUnit)) {
+            drivableGameUnit.Hit(damage);
+        }
+        else if(collision.gameObject.TryGetComponent(out Eagle eagle)) {
+            eagle.Hit(damage);
         }
         else if(collision.gameObject.TryGetComponent(out DestroyableBlock destroyableBlock)) {
             var dir = transform.forward;
             dir.y = 0f;
-            destroyableBlock.Hit(parentDrivableTank.bulletDamage,dir,10f);
+            destroyableBlock.Hit(damage,dir,10f);
         }
         Destroy(gameObject);
     }

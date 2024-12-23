@@ -1,8 +1,7 @@
 using UnityEngine;
 
 public class SimpleRagdoll : MonoBehaviour {
-    [SerializeField]
-    private float despawnTime;
+    private float despawnTime = -1f;
     [SerializeField]
     private Rigidbody[] movingFragments;
 
@@ -16,7 +15,12 @@ public class SimpleRagdoll : MonoBehaviour {
         }
     }
 
-    public void Init(Vector3 direction,float force) {
+    public void Init(float _despawnTime) {
+        despawnTime = _despawnTime;
+    }
+
+    public void Init(float _despawnTime,Vector3 direction,float force) {
+        despawnTime = _despawnTime;
         foreach(var fragment in movingFragments) {
             fragment.AddForce(direction * force,ForceMode.VelocityChange);
         }

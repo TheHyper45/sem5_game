@@ -19,7 +19,7 @@ public class DestroyableBlock : MonoBehaviour {
         if(health <= 0) return;
         health -= damage;
         if(health > 0) return;
-        Instantiate(destroyedPrefab,transform.position,Quaternion.identity).Init(direction,force);
+        Instantiate(destroyedPrefab,transform.position,Quaternion.identity).Init(5f,direction,force);
         if(dropPickupPrefab) Instantiate(dropPickupPrefab,transform.position + new Vector3(0f,0.5f,0f),Quaternion.identity);
         Destroy(gameObject);
     }
