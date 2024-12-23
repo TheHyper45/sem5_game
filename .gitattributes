@@ -1,0 +1,13 @@
+* text=auto eol=lf
+*.bmp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.blend binary
+*.blend1 binary
+*.fbx binary
+*.dae binary
+*.glb binary
+*.pyc binary
+*.bin binary
+*.ttf binary
