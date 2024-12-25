@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DrivableGameUnit : MonoBehaviour {
     public float moveSpeed,turnSpeed;
@@ -32,10 +33,21 @@ public class DrivableGameUnit : MonoBehaviour {
     public Collider[] BulletIgnoreColliders { get; private set; }
     public float ShootCooldown { get; private set; } = float.MaxValue;
 
+    public static DrivableGameUnit player;
+    public static List<DrivableGameUnit> enemies = new();
+    private readonly Quaternion towerAdjustRotation = Quaternion.Euler(90f,0f,0f);
+
     private void Awake() {
+        if(CompareTag("Player")) player = this;
+        else if(CompareTag("Enemy")) enemies.Add(this);
         Rigidbody = GetComponent<Rigidbody>();
         BulletIgnoreColliders = GetComponentsInChildren<Collider>(true);
         SwitchGun(singleBarrelGun);
+    }
+
+    private void OnDestroy() {
+        if(CompareTag("Player")) player = null;
+        else if(CompareTag("Enemy")) enemies.Remove(this);
     }
 
     private void Start() {
@@ -75,6 +87,11 @@ public class DrivableGameUnit : MonoBehaviour {
         singleBarrelGun.gameObject.SetActive(ReferenceEquals(singleBarrelGun,gun));
         doubleBarrelGun.gameObject.SetActive(ReferenceEquals(doubleBarrelGun,gun));
         currentGun = gun;
+    }
+
+    public void RotateGunTowardsUpdate(float x,float z,float dt) {
+        var towerTargetRotation = Quaternion.LookRotation(new(x,0f,z),transform.up) * towerAdjustRotation;
+        currentGun.transform.rotation = Quaternion.Slerp(currentGun.transform.rotation,towerTargetRotation,towerRotateSpeed * dt);
     }
 
     public void Shoot() {

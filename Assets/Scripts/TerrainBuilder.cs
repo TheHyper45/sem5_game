@@ -9,25 +9,15 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
 public class TerrainBuilder : MonoBehaviour {
-    private void OnEnable() {
-        LoadTerrainDataFrom($"Assets/Resources/Levels/{SceneManager.GetActiveScene().name}.json");
-    }
+    public TerrainData terrainData;
 
-    public void SetTerrainData(TerrainData terrainData) {
+    private void OnEnable() => RefreshTerreinMesh();
+
+    public void RefreshTerreinMesh() {
         var mesh = BuildTerrainMesh(terrainData);
         GetComponent<MeshFilter>().sharedMesh = mesh;
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
-
-    public void LoadTerrainDataFrom(string path) {
-        var data = TerrainData.FromJsonFile(path);
-        var mesh = BuildTerrainMesh(data);
-        GetComponent<MeshFilter>().sharedMesh = mesh;
-        GetComponent<MeshCollider>().sharedMesh = mesh;
-    }
-
-    private static readonly float TextureTileWidth = 32f / 256f;
-    private static readonly float TextureTileHeight = 32f / 256f;
 
     private static readonly Vector2[,] QuadUVs = new Vector2[,] {
         {new(0f,1f),new(1f,1f),new(1f,0f),new(0f,0f)},
@@ -38,6 +28,12 @@ public class TerrainBuilder : MonoBehaviour {
         {new(0f,0f),new(0f,1f),new(1f,1f),new(1f,0f)},
     };
 
+    private readonly static int TextureGrassTopLayerIndex = 0;
+    private readonly static int TextureStoneLayerIndex = 1;
+    private readonly static int TextureGrassSideLayerindex = 2;
+
+
+    //@TODO: Merge smaller quads into bigger ones.
     public static Mesh BuildTerrainMesh(TerrainData terrainData) {
         List<Vector3> vertexPositions = new();
         List<Vector3> vertexUVs = new();
@@ -60,7 +56,7 @@ public class TerrainBuilder : MonoBehaviour {
                 vertexPositions.Add(new(x + 0f,height,z + 0f));
                 vertexPositions.Add(new(x + 1f,height,z + 1f));
                 vertexPositions.Add(new(x + 1f,height,z + 0f));
-                AddUVs(0,true);
+                AddUVs(TextureGrassTopLayerIndex,true);
 
                 for(int y = height;y > terrainData.GetHeight(x,z - 1);y -= 1) {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
@@ -69,7 +65,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
-                    AddUVs(y == height ? 2 : 1,y < height);
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
                 }
                 for(int y = height;y > terrainData.GetHeight(x,z + 1);y -= 1) {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
@@ -78,7 +74,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
-                    AddUVs(y == height ? 2 : 1,y < height);
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
                 }
                 for(int y = height;y > terrainData.GetHeight(x - 1,z);y -= 1) {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
@@ -87,7 +83,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
-                    AddUVs(y == height ? 2 : 1,y < height);
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
                 }
                 for(int y = height;y > terrainData.GetHeight(x + 1,z);y -= 1) {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
@@ -96,7 +92,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
-                    AddUVs(y == height ? 2 : 1,y < height);
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
                 }
             }
         }
@@ -113,6 +109,18 @@ public class TerrainBuilder : MonoBehaviour {
         mesh.UploadMeshData(false);
         return mesh;
     }
+
+    //private static readonly float TextureTileWidth = 32f / 256f;
+    //private static readonly float TextureTileHeight = 32f / 256f;
+
+    /*private static readonly Vector2[,] QuadUVs = new Vector2[,] {
+        {new(0.0f,1.0f)},
+        {new(TextureTileWidth,1.0f)},
+        {new(TextureTileWidth,1.0f - TextureTileHeight)},
+        {new(0.0f,1.0f)},
+        {new(TextureTileWidth,1.0f - TextureTileHeight)},
+        {new(0.0f,1.0f - TextureTileHeight)},
+    };*/
 }
 
 [Serializable]
@@ -189,11 +197,16 @@ public struct TerrainData {
         File.WriteAllText(path,JsonUtility.ToJson(this));
     }
 
+    public static TerrainData FromJsonString(string content) {
+        return JsonUtility.FromJson<TerrainData>(content);
+    }
+
     public static TerrainData FromJsonFile(string path) {
         try {
             return JsonUtility.FromJson<TerrainData>(File.ReadAllText(path));
         }
         catch(FileNotFoundException) {
+            File.WriteAllText(path,"{\"sizeX\": 1,\"sizeZ\": 1,\"heights\": [0]}");
             return new() { sizeX = 1,sizeZ = 1,heights = new int[1] };
         }
     }
