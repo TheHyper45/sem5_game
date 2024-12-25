@@ -5,8 +5,6 @@ public class PlayerDrivableGameUnitController : MonoBehaviour {
     private DrivableGameUnit drivableGameUnit;
     [SerializeField]
     private PlayerUI playerUI;
-    [SerializeField]
-    private float towerRotateSpeed;
 
     public Vector3 cameraRelativePosition;
     public Vector3 cameraRelativeLookAtPoint;
@@ -33,7 +31,7 @@ public class PlayerDrivableGameUnitController : MonoBehaviour {
         Camera.main.transform.position = drivableGameUnit.currentGun.transform.position + cameraRelativePosition;
         Camera.main.transform.LookAt(drivableGameUnit.currentGun.transform.position + cameraRelativeLookAtPoint);
         var towerTargetRotation = Quaternion.LookRotation(new(cameraRelativeLookAtPoint.x,0f,cameraRelativeLookAtPoint.z),transform.up) * towerAdjustRotation;
-        drivableGameUnit.currentGun.transform.rotation = Quaternion.Slerp(drivableGameUnit.currentGun.transform.rotation,towerTargetRotation,towerRotateSpeed * Time.deltaTime);
+        drivableGameUnit.currentGun.transform.rotation = Quaternion.Slerp(drivableGameUnit.currentGun.transform.rotation,towerTargetRotation,drivableGameUnit.towerRotateSpeed * Time.deltaTime);
     }
 
     private void FixedUpdate() {

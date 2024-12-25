@@ -115,7 +115,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthBar: {fileID: 3528090175945456021}
-  maxHealth: 3
+  maxHealth: 5
 --- !u!65 &1978671523188123466
 BoxCollider:
   m_ObjectHideFlags: 0

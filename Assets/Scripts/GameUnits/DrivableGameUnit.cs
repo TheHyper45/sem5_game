@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class DrivableGameUnit : MonoBehaviour {
     public float moveSpeed,turnSpeed;
+    public float towerRotateSpeed;
     public int maxHealth;
     public int damage;
     public float roundsPerSecond;
