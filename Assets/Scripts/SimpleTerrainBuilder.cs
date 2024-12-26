@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
-public class TerrainBuilder : MonoBehaviour {
-    public TerrainData terrainData;
+public class SimpleTerrainBuilder : MonoBehaviour {
+    public SimpleTerrainData terrainData;
 
     private void OnEnable() => RefreshTerreinMesh();
 
@@ -34,15 +33,22 @@ public class TerrainBuilder : MonoBehaviour {
 
 
     //@TODO: Merge smaller quads into bigger ones.
-    public static Mesh BuildTerrainMesh(TerrainData terrainData) {
+    public static Mesh BuildTerrainMesh(SimpleTerrainData terrainData) {
         List<Vector3> vertexPositions = new();
         List<Vector3> vertexUVs = new();
+        List<Vector3> normals = new();
 
         void AddUVs(int layer,bool randomUVs = false) {
             int index = randomUVs ? UnityEngine.Random.Range(0,QuadUVs.GetLength(1)) : 0;
             for(int i = 0;i < QuadUVs.GetLength(0);i += 1) {
                 var uv = QuadUVs[i,index];
                 vertexUVs.Add(new(uv.x,uv.y,layer));
+            }
+        }
+
+        void AddNormals(Vector3 normal,int count = 6) {
+            for(int i = 0;i < count;i += 1) {
+                normals.Add(normal);
             }
         }
 
@@ -57,6 +63,7 @@ public class TerrainBuilder : MonoBehaviour {
                 vertexPositions.Add(new(x + 1f,height,z + 1f));
                 vertexPositions.Add(new(x + 1f,height,z + 0f));
                 AddUVs(TextureGrassTopLayerIndex,true);
+                AddNormals(Vector3.up);
 
                 for(int y = height;y > terrainData.GetHeight(x,z - 1);y -= 1) {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
@@ -66,6 +73,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
                     AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.back);
                 }
                 for(int y = height;y > terrainData.GetHeight(x,z + 1);y -= 1) {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
@@ -75,6 +83,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
                     AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.forward);
                 }
                 for(int y = height;y > terrainData.GetHeight(x - 1,z);y -= 1) {
                     vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
@@ -84,6 +93,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
                     vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
                     AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.left);
                 }
                 for(int y = height;y > terrainData.GetHeight(x + 1,z);y -= 1) {
                     vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
@@ -93,6 +103,7 @@ public class TerrainBuilder : MonoBehaviour {
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
                     vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
                     AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.right);
                 }
             }
         }
@@ -106,46 +117,35 @@ public class TerrainBuilder : MonoBehaviour {
         mesh.SetVertices(vertexPositions);
         mesh.SetUVs(0,vertexUVs);
         mesh.SetTriangles(triangleVertexIndicies,0);
+        mesh.SetNormals(normals);
         mesh.UploadMeshData(false);
         return mesh;
     }
-
-    //private static readonly float TextureTileWidth = 32f / 256f;
-    //private static readonly float TextureTileHeight = 32f / 256f;
-
-    /*private static readonly Vector2[,] QuadUVs = new Vector2[,] {
-        {new(0.0f,1.0f)},
-        {new(TextureTileWidth,1.0f)},
-        {new(TextureTileWidth,1.0f - TextureTileHeight)},
-        {new(0.0f,1.0f)},
-        {new(TextureTileWidth,1.0f - TextureTileHeight)},
-        {new(0.0f,1.0f - TextureTileHeight)},
-    };*/
 }
 
 [Serializable]
-public struct TerrainVector2Int {
+public struct SimpleTerrainVector2Int {
     public int x;
     public int z;
 
-    public static bool operator ==(TerrainVector2Int a,TerrainVector2Int b) {
+    public static bool operator ==(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
         return a.x == b.x && a.z == b.z;
     }
 
-    public static bool operator !=(TerrainVector2Int a,TerrainVector2Int b) {
+    public static bool operator !=(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
         return !(a == b);
     }
 
-    public static TerrainVector2Int operator +(TerrainVector2Int a,TerrainVector2Int b) {
+    public static SimpleTerrainVector2Int operator +(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
         return new() { x = a.x + b.x,z = a.z + b.z };
     }
 
-    public static TerrainVector2Int operator-(TerrainVector2Int a,TerrainVector2Int b) {
+    public static SimpleTerrainVector2Int operator-(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
         return new() { x = a.x - b.x,z = a.z - b.z };
     }
 
     public override readonly bool Equals(object obj) {
-        return obj is TerrainVector2Int @int && x == @int.x && z == @int.z;
+        return obj is SimpleTerrainVector2Int @int && x == @int.x && z == @int.z;
     }
 
     public override readonly int GetHashCode() {
@@ -154,12 +154,12 @@ public struct TerrainVector2Int {
 }
 
 [Serializable]
-public struct TerrainData {
+public struct SimpleTerrainData {
     public int sizeX;
     public int sizeZ;
     public int[] heights;
 
-    public readonly void SetHeight(TerrainVector2Int coords,int value) {
+    public readonly void SetHeight(SimpleTerrainVector2Int coords,int value) {
         SetHeight(coords.x,coords.z,value);
     }
 
@@ -167,7 +167,7 @@ public struct TerrainData {
         heights[Mathf.Clamp(z,0,sizeZ - 1) * sizeX + Mathf.Clamp(x,0,sizeX - 1)] = value;
     }
 
-    public readonly int GetHeight(TerrainVector2Int coords) {
+    public readonly int GetHeight(SimpleTerrainVector2Int coords) {
         return GetHeight(coords.x,coords.z);
     }
 
@@ -180,7 +180,7 @@ public struct TerrainData {
         newSizeZ = Mathf.Max(0,newSizeZ);
         if(sizeX == newSizeX && sizeZ == newSizeZ) return;
 
-        int[] newHeights = new int[newSizeX * newSizeZ];
+        var newHeights = new int[newSizeX * newSizeZ];
         for(int z = 0;z < newSizeZ;z += 1) {
             if(z >= sizeZ) continue;
             for(int x = 0;x < newSizeX;x += 1) {
@@ -197,13 +197,13 @@ public struct TerrainData {
         File.WriteAllText(path,JsonUtility.ToJson(this));
     }
 
-    public static TerrainData FromJsonString(string content) {
-        return JsonUtility.FromJson<TerrainData>(content);
+    public static SimpleTerrainData FromJsonString(string text) {
+        return JsonUtility.FromJson<SimpleTerrainData>(text);
     }
 
-    public static TerrainData FromJsonFile(string path) {
+    public static SimpleTerrainData FromJsonFile(string path) {
         try {
-            return JsonUtility.FromJson<TerrainData>(File.ReadAllText(path));
+            return JsonUtility.FromJson<SimpleTerrainData>(File.ReadAllText(path));
         }
         catch(FileNotFoundException) {
             File.WriteAllText(path,"{\"sizeX\": 1,\"sizeZ\": 1,\"heights\": [0]}");

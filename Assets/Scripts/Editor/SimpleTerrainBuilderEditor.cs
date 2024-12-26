@@ -1,16 +1,15 @@
-using System;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
-[CustomEditor(typeof(TerrainBuilder))]
-public class TerrainBuilderEditor : Editor {
+[CustomEditor(typeof(SimpleTerrainBuilder))]
+public class SimpleTerrainBuilderEditor : Editor {
     private bool editingTerreinData = false;
-    private TerrainVector2Int firstSelectedTileCoords = new() { x = -1,z = -1 };
-    private readonly List<TerrainVector2Int> nextSelectedTileCoords = new();
+    private SimpleTerrainVector2Int firstSelectedTileCoords = new() { x = -1,z = -1 };
+    private readonly List<SimpleTerrainVector2Int> nextSelectedTileCoords = new();
 
-    private void HandleTerrainResizing(TerrainBuilder terrainBuilder) {
+    private void HandleTerrainResizing(SimpleTerrainBuilder terrainBuilder) {
         Vector3 endPos = new(terrainBuilder.terrainData.sizeX,0f,terrainBuilder.terrainData.sizeZ);
         EditorGUI.BeginChangeCheck();
         endPos = Handles.Slider(endPos,Vector3.forward);
@@ -23,7 +22,7 @@ public class TerrainBuilderEditor : Editor {
         Handles.Label(endPos,$"x: {terrainBuilder.terrainData.sizeX},z: {terrainBuilder.terrainData.sizeZ}");
     }
 
-    private void HandleTileSelection(TerrainBuilder terrainBuilder) {
+    private void HandleTileSelection(SimpleTerrainBuilder terrainBuilder) {
         var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         if(!Physics.Raycast(ray,out RaycastHit raycastHit)) return;
         var px = (int)raycastHit.point.x;
@@ -65,9 +64,9 @@ public class TerrainBuilderEditor : Editor {
         }
     }
 
-    private void ChangeSelectedTilesHeight(TerrainBuilder terrainBuilder,int value) {
+    private void ChangeSelectedTilesHeight(SimpleTerrainBuilder terrainBuilder,int value) {
         if(value == 0) return;
-        Undo.RecordObject(terrainBuilder,"Change height of terrein tiles.");
+        Undo.RecordObject(terrainBuilder,"Change height of selected terrein tiles.");
         terrainBuilder.terrainData.SetHeight(firstSelectedTileCoords,terrainBuilder.terrainData.GetHeight(firstSelectedTileCoords) + value);
         foreach(var tileCoord in nextSelectedTileCoords) {
             terrainBuilder.terrainData.SetHeight(tileCoord,terrainBuilder.terrainData.GetHeight(tileCoord) + value);
@@ -75,9 +74,39 @@ public class TerrainBuilderEditor : Editor {
         terrainBuilder.RefreshTerreinMesh();
     }
 
+    private void MoveSelectedTiles(SimpleTerrainBuilder terrainBuilder,int valueX,int valueZ) {
+        if(valueX == 0 && valueZ == 0) return;
+        Undo.RecordObject(terrainBuilder,"Move selected terrein tiles.");
+
+        List<SimpleTerrainVector2Int> selectedTiles = new() { firstSelectedTileCoords };
+        selectedTiles.AddRange(nextSelectedTileCoords);
+
+        if(valueX != 0) {
+            selectedTiles.Sort((a,b) => (valueX > 0) ? b.x.CompareTo(a.x) : a.x.CompareTo(b.x));
+            foreach(var tile in selectedTiles) {
+                terrainBuilder.terrainData.SetHeight(tile.x + valueX,tile.z,terrainBuilder.terrainData.GetHeight(tile));
+                terrainBuilder.terrainData.SetHeight(tile,0);
+            }
+        }
+        if(valueZ != 0) {
+            selectedTiles.Sort((a,b) => (valueZ > 0) ? b.z.CompareTo(a.z) : a.z.CompareTo(b.z));
+            foreach(var tile in selectedTiles) {
+                terrainBuilder.terrainData.SetHeight(tile.x,tile.z + valueZ,terrainBuilder.terrainData.GetHeight(tile));
+                terrainBuilder.terrainData.SetHeight(tile,0);
+            }
+        }
+
+        firstSelectedTileCoords.x += valueX;
+        firstSelectedTileCoords.z += valueZ;
+        for(int i = 0;i < nextSelectedTileCoords.Count;i += 1) {
+            nextSelectedTileCoords[i] = new() { x = nextSelectedTileCoords[i].x + valueX,z = nextSelectedTileCoords[i].z + valueZ };
+        }
+        terrainBuilder.RefreshTerreinMesh();
+    }
+
     private void OnSceneGUI() {
         if(!editingTerreinData) return;
-        var terrainBuilder = (TerrainBuilder)target;
+        var terrainBuilder = (SimpleTerrainBuilder)target;
         EditorUtility.SetDirty(terrainBuilder);
         HandleTerrainResizing(terrainBuilder);
 
@@ -92,10 +121,11 @@ public class TerrainBuilderEditor : Editor {
             var firstHandlePosY = terrainBuilder.terrainData.GetHeight(firstSelectedTileCoords.x,firstSelectedTileCoords.z);
             Vector3 firstHandlePos = new(firstSelectedTileCoords.x + 0.5f,firstHandlePosY,firstSelectedTileCoords.z + 0.5f);
             EditorGUI.BeginChangeCheck();
-            var newFirstHandlePos = Handles.Slider(firstHandlePos,Vector3.up);
+            var newFirstHandlePos = Handles.PositionHandle(firstHandlePos,Quaternion.identity);
             if(EditorGUI.EndChangeCheck()) {
                 var diff = newFirstHandlePos - firstHandlePos;
                 ChangeSelectedTilesHeight(terrainBuilder,(int)diff.y);
+                MoveSelectedTiles(terrainBuilder,(int)diff.x,(int)diff.z);
             }
         }
 
@@ -107,7 +137,7 @@ public class TerrainBuilderEditor : Editor {
     }
 
     public override void OnInspectorGUI() {
-        var terrainBuilder = (TerrainBuilder)target;
+        var terrainBuilder = (SimpleTerrainBuilder)target;
         EditorGUI.BeginChangeCheck();
         editingTerreinData = GUILayout.Toggle(editingTerreinData,"Edit Terrein","Button");
         if(EditorGUI.EndChangeCheck()) {
@@ -119,12 +149,13 @@ public class TerrainBuilderEditor : Editor {
             var filePath = EditorUtility.SaveFilePanel("Save Terrein Data","Assets/Resources/Levels","Default","json");
             if(!string.IsNullOrEmpty(filePath)) {
                 terrainBuilder.terrainData.ToJsonFile(filePath);
+                AssetDatabase.CreateAsset(terrainBuilder.GetComponent<MeshFilter>().sharedMesh,$"Assets/Resources/Levels/{Path.GetFileNameWithoutExtension(filePath)}_TerrainMesh.asset");
             }
         }
         if(GUILayout.Button("Load Terrein Data",GUILayout.ExpandWidth(false))) {
             var filePath = EditorUtility.OpenFilePanel("Save Terrein Data","Assets/Resources/Levels","json");
             if(!string.IsNullOrEmpty(filePath)) {
-                terrainBuilder.terrainData = TerrainData.FromJsonFile(filePath);
+                terrainBuilder.terrainData = SimpleTerrainData.FromJsonFile(filePath);
                 terrainBuilder.RefreshTerreinMesh();
             }
         }
