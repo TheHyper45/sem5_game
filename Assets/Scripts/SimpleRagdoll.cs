@@ -7,9 +7,9 @@ public class SimpleRagdoll : MonoBehaviour {
 
     private float timer = 0f;
 
-    private void Update() {
+    private void FixedUpdate() {
         if(despawnTime < 0f) return;
-        timer += Time.deltaTime;
+        timer += Time.fixedDeltaTime;
         if(timer >= despawnTime) {
             Destroy(gameObject);
         }

@@ -12,15 +12,8 @@ public class DestroyableBlock : MonoBehaviour {
 
     public int health;
 
-    public static readonly List<DestroyableBlock> allBlocks = new();
-
     private void Awake() {
-        allBlocks.Add(this);
         health = maxHealth;
-    }
-
-    private void OnDestroy() {
-        allBlocks.Remove(this);
     }
 
     public void Hit(int damage,Vector3 direction,float force) {

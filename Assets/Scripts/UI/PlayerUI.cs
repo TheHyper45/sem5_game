@@ -9,7 +9,7 @@ public class PlayerUI : MonoBehaviour {
     private float targetValue = 1f;
 
     private void Update() {
-        currentValue = Mathf.Lerp(currentValue,targetValue,Time.deltaTime * 3f);
+        currentValue = Mathf.Lerp(currentValue,targetValue,Time.deltaTime * 5f);
         healthBar.value = currentValue;
     }
 

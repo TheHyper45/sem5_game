@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class TankSpawner : MonoBehaviour {
-    [SerializeField]
+    /*[SerializeField]
     private DrivableGameUnit drivableGameUnitPrefab;
     [SerializeField]
     private float spawnTime;
@@ -19,5 +19,5 @@ public class TankSpawner : MonoBehaviour {
             timer = 0f;
             spawnCount += 1;
         }
-    }
+    }*/
 }

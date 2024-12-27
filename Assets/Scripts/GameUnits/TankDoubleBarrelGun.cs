@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GameUnitDoubleBarrelGun : GameUnitGun {
+public class TankDoubleBarrelGun : TankGun {
     [SerializeField]
     private Transform rightBulletSpawnPoint;
     [SerializeField]

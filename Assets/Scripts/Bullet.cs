@@ -13,10 +13,10 @@ public class Bullet : MonoBehaviour {
         Collider = GetComponent<Collider>();
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         if(!startTimer) return;
-        timer += Time.deltaTime;
-        if(timer >= 5f) Destroy(gameObject);
+        timer += Time.fixedDeltaTime;
+        if(timer >= 0.333f) Destroy(gameObject);
     }
 
     public void Init(int _damage,Collider[] parentIgnoreColliders) {
@@ -31,7 +31,7 @@ public class Bullet : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision) {
         var topParent = collision.gameObject.transform.root;
-        if(topParent.TryGetComponent(out DrivableGameUnit drivableGameUnit)) {
+        if(topParent.TryGetComponent(out Tank drivableGameUnit)) {
             drivableGameUnit.Hit(damage);
         }
         else if(collision.gameObject.TryGetComponent(out Eagle eagle)) {

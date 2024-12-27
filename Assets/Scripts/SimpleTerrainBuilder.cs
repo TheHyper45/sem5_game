@@ -144,6 +144,10 @@ public struct SimpleTerrainVector2Int {
         return new() { x = a.x - b.x,z = a.z - b.z };
     }
 
+    public static float EuclideanDistance(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return Mathf.Sqrt((a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z));
+    }
+
     public override readonly bool Equals(object obj) {
         return obj is SimpleTerrainVector2Int @int && x == @int.x && z == @int.z;
     }
