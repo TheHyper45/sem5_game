@@ -6,17 +6,17 @@ public class Tank : MonoBehaviour {
     public int maxHealth;
     public int damage;
     public float roundsPerSecond;
-    public TankGun singleBarrelGun;
-    public TankGun doubleBarrelGun;
 
     [SerializeField]
-    private Animator rightTreadAnimation,leftTreadAnimation;
+    protected Animator rightTreadAnimation,leftTreadAnimation;
     [SerializeField]
     private GameObject[] ragdollDestroyObjects;
     [SerializeField]
     private GameObject[] ragdollAddRigidbodyObjects;
     [SerializeField]
     private HealthBar healthBar;
+    [SerializeField]
+    private Transform gunSpawnPoint;
 
     [NonSerialized,HideInInspector]
     public int health;
@@ -27,10 +27,12 @@ public class Tank : MonoBehaviour {
     public Collider[] BulletIgnoreColliders { get; private set; }
     public float ShootCooldown { get; private set; } = float.MaxValue;
 
+    public readonly Quaternion gunFixRotation = Quaternion.Euler(90f,0f,0f);
+
     protected virtual void Awake() {
         Rigidbody = GetComponent<Rigidbody>();
         BulletIgnoreColliders = GetComponentsInChildren<Collider>(true);
-        SwitchGun(singleBarrelGun);
+        SwitchGun(GameState.instance.singleBarrelTowerPrefab);
     }
 
     protected virtual void Start() {
@@ -40,16 +42,11 @@ public class Tank : MonoBehaviour {
 
     protected virtual void FixedUpdate() {
         ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime,1f / roundsPerSecond);
-        /*float rightThreadAnimationSpeed = moveDirection * moveSpeed * 1.15f;
-        float leftThreadAnimationSpeed = moveDirection * moveSpeed * 1.15f;
-        rightTreadAnimation.SetFloat("MoveSpeed",rightThreadAnimationSpeed);
-        leftTreadAnimation.SetFloat("MoveSpeed",leftThreadAnimationSpeed);*/
     }
 
-    public void SwitchGun(TankGun gun) {
-        singleBarrelGun.gameObject.SetActive(ReferenceEquals(singleBarrelGun,gun));
-        doubleBarrelGun.gameObject.SetActive(ReferenceEquals(doubleBarrelGun,gun));
-        currentGun = gun;
+    public void SwitchGun(TankGun gunPrefab) {
+        if(currentGun) Destroy(currentGun);
+        currentGun = Instantiate(gunPrefab,gunSpawnPoint.position,gunFixRotation,gunSpawnPoint);
     }
 
     public void Shoot() {
@@ -70,6 +67,7 @@ public class Tank : MonoBehaviour {
         foreach(var obj in ragdollAddRigidbodyObjects) {
             obj.AddComponent<Rigidbody>().mass = 500;
         }
+        if(currentGun) currentGun.gameObject.AddComponent<Rigidbody>().mass = 500;
 
         gameObject.AddComponent<SimpleRagdoll>().Init(5f);
         Destroy(Rigidbody);

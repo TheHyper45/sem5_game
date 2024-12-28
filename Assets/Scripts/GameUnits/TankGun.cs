@@ -5,7 +5,7 @@ public class TankGun : MonoBehaviour {
     protected Bullet bulletPrefab;
     protected Tank parentDrivableUnit;
 
-    private void Awake() {
+    protected virtual void Awake() {
         parentDrivableUnit = GetComponentInParent<Tank>();
     }
 

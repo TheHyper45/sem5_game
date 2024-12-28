@@ -23,7 +23,7 @@ public class Bullet : MonoBehaviour {
         if(startTimer) return;
         damage = _damage;
         startTimer = true;
-        rigidbody.AddForce(transform.forward * 60f,ForceMode.VelocityChange);
+        rigidbody.AddForce(transform.forward * 30f,ForceMode.VelocityChange);
         foreach(var parentCollider in parentIgnoreColliders) {
             Physics.IgnoreCollision(Collider,parentCollider);
         }
