@@ -25,7 +25,7 @@ public class DestroyableBlock : MonoBehaviour {
     private void FixedUpdate() {
         if(!healthBar) return;
         if(!healthBar.gameObject.activeSelf) return;
-        timer -= Time.fixedDeltaTime;
+        timer -= Time.fixedDeltaTime * Time.timeScale;
         if(timer > 0f) return;
         timer = 0f;
         healthBar.gameObject.SetActive(false);

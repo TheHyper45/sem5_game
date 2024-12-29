@@ -7,7 +7,6 @@ public class PlayerTank : Tank {
     public static PlayerTank instance;
 
     private readonly Quaternion cameraFixRotation = Quaternion.Euler(90f,0f,0f);
-
     private readonly RaycastHit[] mouseRaycastHits = new RaycastHit[1];
 
     private readonly Quaternion tankWRotation = Quaternion.Euler(0f,0f,0f);
@@ -47,27 +46,27 @@ public class PlayerTank : Tank {
     protected override void FixedUpdate() {
         base.FixedUpdate();
         if(Input.GetKey(KeyCode.Mouse0)) Shoot();
-        float step = Time.fixedDeltaTime * Time.timeScale;
+        float moveStep = Time.fixedDeltaTime * Time.timeScale;
         float moveX = 0f;
         float moveZ = 0f;
         if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
             moveX = 1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankWRotation,Time.fixedDeltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation,tankWRotation,moveStep * 5f);
         }
         else if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
             moveX = -1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankSRotation,Time.fixedDeltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation,tankSRotation,moveStep * 5f);
         }
         if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
             moveZ = 1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankDRotation,Time.fixedDeltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation,tankDRotation,moveStep * 5f);
         }
         else if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
             moveZ = -1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankARotation,Time.fixedDeltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation,tankARotation,moveStep * 5f);
         }
         var moveVector = (moveX * Camera.main.transform.up + moveZ * Camera.main.transform.right).normalized;
-        Rigidbody.MovePosition(transform.position + moveSpeed * step * moveVector);
+        Rigidbody.MovePosition(transform.position + moveSpeed * moveStep * moveVector);
         float threadAnimationSpeed = Mathf.Abs(moveX) + Mathf.Abs(moveZ) > 0.0001f ? moveSpeed * 1.15f : 0f;
         rightTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);
         leftTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);

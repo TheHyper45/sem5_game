@@ -84,10 +84,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
-    - target: {fileID: 1398469375850508965, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 1434749685407453011, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -180,10 +176,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
-    - target: {fileID: 2492572107108635246, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 2530925302136184510, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -196,10 +188,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: a399b4e49d029414fa869716e38cfc3b, type: 2}
-    - target: {fileID: 2776442555641334615, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 2791680153384488235, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -381,10 +369,6 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 5562705747378597383, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 5629005630928753445, guid: 0643544f84f787c4fa50646162b2e063, type: 3}
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
@@ -703,10 +687,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b75c4a57e239f34798efd90a323134a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 4
   maxHealth: 40
   damage: 7
-  roundsPerSecond: 7
+  roundsPerSecond: 5
   rightTreadAnimation: {fileID: 7078619910819505332}
   leftTreadAnimation: {fileID: 7598210167705218427}
   ragdollDestroyObjects:
@@ -717,6 +701,15 @@ MonoBehaviour:
   - {fileID: 4943027289358413103}
   healthBar: {fileID: 1936232616714758323}
   gunSpawnPoint: {fileID: 2821988936560818036}
+  playerOverlapSphereTargetMask:
+    serializedVersion: 2
+    m_Bits: 64
+  playerRaycastTargetMask:
+    serializedVersion: 2
+    m_Bits: 2113
+  destroyableBlockMask:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!4 &2821988936560818036 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8131463128029063422, guid: 0643544f84f787c4fa50646162b2e063, type: 3}

@@ -41,7 +41,7 @@ public class Tank : MonoBehaviour {
     }
 
     protected virtual void FixedUpdate() {
-        ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime,1f / roundsPerSecond);
+        ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime * Time.timeScale,1f / roundsPerSecond);
     }
 
     public void SwitchGun(TankGun gunPrefab) {

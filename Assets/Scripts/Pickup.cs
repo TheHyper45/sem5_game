@@ -5,7 +5,7 @@ public class Pickup : MonoBehaviour {
     private float rotateSpeed;
 
     private void FixedUpdate() {
-        transform.Rotate(0f,Time.fixedDeltaTime * rotateSpeed * Mathf.Rad2Deg,0f);
+        transform.Rotate(0f,Time.fixedDeltaTime * Time.timeScale * rotateSpeed * Mathf.Rad2Deg,0f);
     }
 
     public virtual void Collect(Tank tank) {

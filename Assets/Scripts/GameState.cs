@@ -8,7 +8,6 @@ public class GameState : MonoBehaviour {
 
     private void Awake() {
         if(instance) {
-            Debug.LogError("Only one \"GameState\" instance can exist at any given moment.");
             Destroy(gameObject);
             return;
         }
