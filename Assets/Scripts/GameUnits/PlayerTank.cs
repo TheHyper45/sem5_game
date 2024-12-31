@@ -9,11 +9,6 @@ public class PlayerTank : Tank {
     private readonly Quaternion cameraFixRotation = Quaternion.Euler(90f,0f,0f);
     private readonly RaycastHit[] mouseRaycastHits = new RaycastHit[1];
 
-    private readonly Quaternion tankWRotation = Quaternion.Euler(0f,0f,0f);
-    private readonly Quaternion tankSRotation = Quaternion.Euler(0f,180f,0f);
-    private readonly Quaternion tankDRotation = Quaternion.Euler(0f,90f,0f);
-    private readonly Quaternion tankARotation = Quaternion.Euler(0f,270f,0f);
-
     private bool setInstanceToNullOnDestruction = true;
 
     protected override void Awake() {
@@ -51,24 +46,24 @@ public class PlayerTank : Tank {
         float moveZ = 0f;
         if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
             moveX = 1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankWRotation,moveStep * 5f);
         }
         else if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
             moveX = -1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankSRotation,moveStep * 5f);
         }
         if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
             moveZ = 1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankDRotation,moveStep * 5f);
         }
         else if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
             moveZ = -1f;
-            transform.rotation = Quaternion.Slerp(transform.rotation,tankARotation,moveStep * 5f);
         }
-        var moveVector = (moveX * Camera.main.transform.up + moveZ * Camera.main.transform.right).normalized;
-        Rigidbody.MovePosition(transform.position + moveSpeed * moveStep * moveVector);
-        float threadAnimationSpeed = Mathf.Abs(moveX) + Mathf.Abs(moveZ) > 0.0001f ? moveSpeed * 1.15f : 0f;
-        rightTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);
-        leftTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);
+        bool isMoving = Mathf.Abs(moveX) + Mathf.Abs(moveZ) > 0.0001f;
+        if(isMoving) {
+            var moveVector = (moveX * Camera.main.transform.up + moveZ * Camera.main.transform.right).normalized;
+            Rigidbody.MovePosition(transform.position + moveSpeed * moveStep * moveVector);
+            Rigidbody.MoveRotation(Quaternion.Slerp(transform.rotation,Quaternion.LookRotation(moveVector),moveStep * 4f));
+        }
+        float treadAnimationSpeed = isMoving ? moveSpeed * 1.2f : 0f;
+        rightTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
+        leftTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
     }
 }

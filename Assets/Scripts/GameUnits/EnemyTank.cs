@@ -1,101 +1,60 @@
+using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyTank : Tank {
-    [SerializeField]
-    private LayerMask playerOverlapSphereTargetMask;
-    [SerializeField]
-    private LayerMask playerRaycastTargetMask;
-    [SerializeField]
-    private LayerMask destroyableBlockMask;
-
-    private PlayerTank targetPlayerTank = null;
-    private enum State { Idle,Chase,Attack }
-    private State state = State.Idle;
-    private readonly Collider[] idleOverlapColliders = new Collider[1];
-    //private Vector3 chaseLastPos
-
-    private void IdleStateFixedUpdate() {
-        targetPlayerTank = null;
-        var overlapColliderCount = Physics.OverlapSphereNonAlloc(transform.position,10f,idleOverlapColliders,playerOverlapSphereTargetMask);
-        for(int i = 0;i < overlapColliderCount;i += 1) {
-            if(!idleOverlapColliders[i].TryGetComponent(out targetPlayerTank)) continue;
-            var raycastDirection = (targetPlayerTank.transform.position - transform.position).normalized;
-
-            if(Physics.Raycast(transform.position,raycastDirection,out RaycastHit playerRaycastHit,10f,playerRaycastTargetMask) &&
-               ReferenceEquals(playerRaycastHit.transform.gameObject,targetPlayerTank.gameObject)) {
-                state = State.Attack;
-            }
-        }
-    }
-
-    private void ChaseStateFixedUpdate() {
-
-    }
-
-    private void AttackStateFixedUpdate() {
-        float moveStep = Time.fixedDeltaTime * Time.timeScale;
-        var raycastDirection = (targetPlayerTank.transform.position - transform.position).normalized;
-        transform.rotation = Quaternion.Slerp(transform.rotation,Quaternion.LookRotation(raycastDirection),moveStep * 5f);
-        Shoot();
-
-        /*if(Vector3.Distance(transform.position,targetPlayerTank.transform.position) > 20f) {
-            targetPlayerTank = null;
-            state = State.Idle;
-            return;
-        }
-
-        var raycastDirection = (targetPlayerTank.transform.position - transform.position).normalized;
-        if(Physics.Raycast(transform.position,raycastDirection,out RaycastHit playerRaycastHit,20f,playerRaycastTargetMask)) {
-            if(!ReferenceEquals(playerRaycastHit.transform.gameObject,targetPlayerTank.gameObject)) {
-
-            }
-        }*/
-
-        //ReferenceEquals(playerRaycastHit.transform.gameObject,targetPlayerTank.gameObject)
-    }
+    private NavMeshPath path = null;
+    private int currentPathPointIndex = 0;
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
         if(health <= 0) {
+            rightTreadAnimation.SetFloat("MoveSpeed",0f);
+            leftTreadAnimation.SetFloat("MoveSpeed",0f);
             Destroy(this);
             return;
         }
-
-        if(state == State.Idle) {
-            IdleStateFixedUpdate();
-        }
-        else if(state == State.Chase) {
-            ChaseStateFixedUpdate();
-        }
-        else if(state == State.Attack) {
-            AttackStateFixedUpdate();
+        if(!PlayerTank.instance || Vector3.Distance(PlayerTank.instance.transform.position,transform.position) > 14f) {
+            rightTreadAnimation.SetFloat("MoveSpeed",0f);
+            leftTreadAnimation.SetFloat("MoveSpeed",0f);
+            return;
         }
 
-        /*threadAnimationSpeed = 0f;
-        float moveStep = Time.fixedDeltaTime * Time.timeScale;
-        if(targetPlayerTank) {
-            bool doMove = true;
-            var distance = Vector3.Distance(targetPlayerTank.transform.position,transform.position);
-            moveDirection = (targetPlayerTank.currentGun.transform.position - currentGun.transform.position).normalized;
+        if(path == null) {
+            var gunPosition = currentGun.transform.position;
+            var raycastDirection = (PlayerTank.instance.currentGun.transform.position - gunPosition).normalized;
+            if(!Physics.Raycast(gunPosition,raycastDirection,out RaycastHit raycastHit,14f)) return;
+            if(ReferenceEquals(raycastHit.transform.gameObject,PlayerTank.instance.gameObject)) path = new();
+            return;
+        }
+        if(path.corners == null || path.corners.Length == 0 ||
+           Vector3.Distance(path.corners.Last(),PlayerTank.instance.transform.position) > 7f) {
+            currentPathPointIndex = 1;
+            path.ClearCorners();
+            NavMesh.CalculatePath(transform.position,PlayerTank.instance.transform.position,NavMesh.AllAreas,path);
+            return;
+        }
 
-            if(Physics.Raycast(currentGun.transform.position,moveDirection,out playerRaycastHit,15f,playerRaycastTargetMask) &&
-               ReferenceEquals(playerRaycastHit.transform.gameObject,targetPlayerTank.gameObject)) {
-                currentGun.transform.rotation = Quaternion.LookRotation(moveDirection) * gunFixRotation;
-                
-                doMove = distance >= 5f;
+        var moveStep = Time.fixedDeltaTime * Time.timeScale;
+        var newGunRotation = Quaternion.LookRotation(PlayerTank.instance.currentGun.transform.position - currentGun.transform.position) * gunFixRotation;
+        currentGun.transform.rotation = Quaternion.Slerp(currentGun.transform.rotation,newGunRotation,moveStep * 3f);
+        if(Vector3.Distance(PlayerTank.instance.transform.position,transform.position) <= 7f) Shoot();
+
+        var treadAnimationSpeed = 0f;
+        if(currentPathPointIndex < path.corners.Length) {
+            treadAnimationSpeed = moveSpeed * 1.2f;
+
+            var nextPathPoint = path.corners[currentPathPointIndex];
+            var newPosition = Vector3.MoveTowards(transform.position,nextPathPoint,moveSpeed * moveStep);
+            Rigidbody.MovePosition(newPosition);
+
+            if(Vector3.Distance(newPosition,nextPathPoint) > 0.01f) {
+                var newRotation = Quaternion.LookRotation(nextPathPoint - transform.position);
+                Rigidbody.MoveRotation(Quaternion.Slerp(transform.rotation,newRotation,moveStep * 4f));
             }
-            if(doMove) {
-                transform.rotation = Quaternion.Slerp(transform.rotation,Quaternion.LookRotation(moveDirection),moveStep * 5f);
-                Rigidbody.MovePosition(transform.position + moveSpeed * moveStep * moveDirection);
-                threadAnimationSpeed = moveSpeed * 1.15f;
-            }
+            else currentPathPointIndex += 1;
         }
-        else {
-            var overlapColliderCount = Physics.OverlapSphereNonAlloc(transform.position,10f,overlapColliders,playerOverlapSphereTargetMask);
-            for(int i = 0;i < overlapColliderCount;i += 1) if(overlapColliders[i].TryGetComponent(out targetPlayerTank)) break;
-        }
-
-        rightTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);
-        leftTreadAnimation.SetFloat("MoveSpeed",threadAnimationSpeed);*/
+        rightTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
+        leftTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
     }
 }

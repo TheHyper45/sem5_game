@@ -701,15 +701,6 @@ MonoBehaviour:
   - {fileID: 4943027289358413103}
   healthBar: {fileID: 1936232616714758323}
   gunSpawnPoint: {fileID: 2821988936560818036}
-  playerOverlapSphereTargetMask:
-    serializedVersion: 2
-    m_Bits: 64
-  playerRaycastTargetMask:
-    serializedVersion: 2
-    m_Bits: 2113
-  destroyableBlockMask:
-    serializedVersion: 2
-    m_Bits: 2048
 --- !u!4 &2821988936560818036 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8131463128029063422, guid: 0643544f84f787c4fa50646162b2e063, type: 3}

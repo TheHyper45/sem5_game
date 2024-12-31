@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1832990203997028299}
   - component: {fileID: 8310607302884675106}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -145,7 +145,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5917361222364271512}
   - component: {fileID: 4016706830800784024}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -232,7 +232,7 @@ GameObject:
   m_Component:
   - component: {fileID: 517813851917905475}
   - component: {fileID: 4775333480193602054}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
