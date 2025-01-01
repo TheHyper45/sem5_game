@@ -15,6 +15,7 @@ public class EnemyTank : Tank {
             return;
         }
         if(!PlayerTank.instance || Vector3.Distance(PlayerTank.instance.transform.position,transform.position) > 14f) {
+            path = null;
             rightTreadAnimation.SetFloat("MoveSpeed",0f);
             leftTreadAnimation.SetFloat("MoveSpeed",0f);
             return;
@@ -36,9 +37,11 @@ public class EnemyTank : Tank {
         }
 
         var moveStep = Time.fixedDeltaTime * Time.timeScale;
-        var newGunRotation = Quaternion.LookRotation(PlayerTank.instance.currentGun.transform.position - currentGun.transform.position) * gunFixRotation;
-        currentGun.transform.rotation = Quaternion.Slerp(currentGun.transform.rotation,newGunRotation,moveStep * 3f);
-        if(Vector3.Distance(PlayerTank.instance.transform.position,transform.position) <= 7f) Shoot();
+        if(Vector3.Distance(PlayerTank.instance.transform.position,transform.position) <= 7f) {
+            var newGunRotation = Quaternion.LookRotation(PlayerTank.instance.currentGun.transform.position - currentGun.transform.position) * gunFixRotation;
+            currentGun.transform.rotation = Quaternion.Slerp(currentGun.transform.rotation,newGunRotation,moveStep * 3f);
+            Shoot();
+        }
 
         var treadAnimationSpeed = 0f;
         if(currentPathPointIndex < path.corners.Length) {
@@ -49,7 +52,7 @@ public class EnemyTank : Tank {
             Rigidbody.MovePosition(newPosition);
 
             if(Vector3.Distance(newPosition,nextPathPoint) > 0.01f) {
-                var newRotation = Quaternion.LookRotation(nextPathPoint - transform.position);
+                var newRotation = Quaternion.LookRotation(nextPathPoint - newPosition);
                 Rigidbody.MoveRotation(Quaternion.Slerp(transform.rotation,newRotation,moveStep * 4f));
             }
             else currentPathPointIndex += 1;

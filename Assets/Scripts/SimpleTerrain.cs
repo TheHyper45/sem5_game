@@ -1,111 +1,202 @@
 using System;
-using System.Linq;
+using System.IO;
 using UnityEngine;
-using UnityEngine.Rendering;
 using System.Collections.Generic;
 
-[ExecuteAlways]
-public class SimpleTerrain : MonoBehaviour {
-    [SerializeField]
-    private Mesh mesh;
-    [SerializeField]
-    private Material material;
-    [SerializeField]
-    private TextAsset dataAsset;
+[Serializable]
+public struct SimpleTerrainVector2Int {
+    public int x;
+    public int z;
 
-    [NonSerialized,HideInInspector]
-    public SimpleTerrainData data;
-    public static SimpleTerrain instance;
-
-    private void Awake() {
-        if(!Application.IsPlaying(gameObject)) return;
-        instance = this;
-        data = SimpleTerrainData.FromJsonString(dataAsset.text);
-        gameObject.AddComponent<MeshCollider>().sharedMesh = mesh;
+    public static bool operator ==(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return a.x == b.x && a.z == b.z;
     }
 
-    private void OnDestroy() {
-        if(!Application.IsPlaying(gameObject)) return;
-        instance = null;
+    public static bool operator !=(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return !(a == b);
     }
 
-    private void Update() {
-        //@TODO: This should be cached.
-        RenderParams renderParams = new(material) { receiveShadows = true,shadowCastingMode = ShadowCastingMode.On };
-        Graphics.RenderMesh(renderParams,mesh,0,Matrix4x4.TRS(transform.position,transform.rotation,transform.lossyScale));
+    public static SimpleTerrainVector2Int operator +(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return new() { x = a.x + b.x,z = a.z + b.z };
     }
 
-    /*private class TileComparer : IComparer<SimpleTerrainVector2Int> {
-        public readonly Dictionary<SimpleTerrainVector2Int,float> fScore = new();
+    public static SimpleTerrainVector2Int operator-(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return new() { x = a.x - b.x,z = a.z - b.z };
+    }
 
-        public int Compare(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
-            float scoreA = float.PositiveInfinity;
-            if(fScore.ContainsKey(a)) scoreA = fScore[a];
-            float scoreB = float.PositiveInfinity;
-            if(fScore.ContainsKey(b)) scoreB = fScore[b];
-            return scoreA.CompareTo(scoreB);
+    public static float EuclideanDistance(SimpleTerrainVector2Int a,SimpleTerrainVector2Int b) {
+        return Mathf.Sqrt((a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z));
+    }
+
+    public override readonly bool Equals(object obj) {
+        return obj is SimpleTerrainVector2Int @int && x == @int.x && z == @int.z;
+    }
+
+    public override readonly int GetHashCode() {
+        return HashCode.Combine(x,z);
+    }
+}
+
+[Serializable]
+public struct SimpleTerrainData {
+    public int sizeX;
+    public int sizeZ;
+    public int[] heights;
+
+    public readonly void SetHeight(SimpleTerrainVector2Int coords,int value) {
+        SetHeight(coords.x,coords.z,value);
+    }
+
+    public readonly void SetHeight(int x,int z,int value) {
+        heights[Mathf.Clamp(z,0,sizeZ - 1) * sizeX + Mathf.Clamp(x,0,sizeX - 1)] = value;
+    }
+
+    public readonly int GetHeight(SimpleTerrainVector2Int coords) {
+        return GetHeight(coords.x,coords.z);
+    }
+
+    public readonly int GetHeight(int x,int z) {
+        return heights[Mathf.Clamp(z,0,sizeZ - 1) * sizeX + Mathf.Clamp(x,0,sizeX - 1)];
+    }
+
+    public void Resize(int newSizeX,int newSizeZ) {
+        newSizeX = Mathf.Max(0,newSizeX);
+        newSizeZ = Mathf.Max(0,newSizeZ);
+        if(sizeX == newSizeX && sizeZ == newSizeZ) return;
+
+        var newHeights = new int[newSizeX * newSizeZ];
+        for(int z = 0;z < newSizeZ;z += 1) {
+            if(z >= sizeZ) continue;
+            for(int x = 0;x < newSizeX;x += 1) {
+                if(x >= sizeX) continue;
+                newHeights[z * newSizeX + x] = heights[z * sizeX + x];
+            }
+        }
+        sizeX = newSizeX;
+        sizeZ = newSizeZ;
+        heights = newHeights;
+    }
+
+    public readonly void ToJsonFile(string path) {
+        File.WriteAllText(path,JsonUtility.ToJson(this));
+    }
+
+    public readonly string ToJsonString() {
+        return JsonUtility.ToJson(this);
+    }
+
+    public static SimpleTerrainData FromJsonString(string text) {
+        return JsonUtility.FromJson<SimpleTerrainData>(text);
+    }
+
+    public static SimpleTerrainData FromJsonFile(string path) {
+        try {
+            return JsonUtility.FromJson<SimpleTerrainData>(File.ReadAllText(path));
+        }
+        catch(FileNotFoundException) {
+            File.WriteAllText(path,"{\"sizeX\": 1,\"sizeZ\": 1,\"heights\": [0]}");
+            return new() { sizeX = 1,sizeZ = 1,heights = new int[1] };
         }
     }
 
-    private readonly SimpleTerrainVector2Int[] tileNeighbourOffsets = new SimpleTerrainVector2Int[] {
-        new() { x = 1,z = 0},
-        new() { x = 1,z = 1},
-        new() { x = 0,z = 1},
-        new() { x = -1,z = 1},
-        new() { x = -1,z = 0},
-        new() { x = -1,z = -1},
-        new() { x = 0,z = -1},
-        new() { x = 1,z = -1},
+    private static readonly Vector2[,] QuadUVs = new Vector2[,] {
+        {new(0f,1f),new(1f,1f),new(1f,0f),new(0f,0f)},
+        {new(1f,1f),new(1f,0f),new(0f,0f),new(0f,1f)},
+        {new(1f,0f),new(0f,0f),new(0f,1f),new(1f,1f)},
+        {new(0f,1f),new(1f,1f),new(1f,0f),new(0f,0f)},
+        {new(1f,0f),new(0f,0f),new(0f,1f),new(1f,1f)},
+        {new(0f,0f),new(0f,1f),new(1f,1f),new(1f,0f)},
     };
+    private readonly static int TextureGrassTopLayerIndex = 0;
+    private readonly static int TextureStoneLayerIndex = 1;
+    private readonly static int TextureGrassSideLayerindex = 2;
 
-    private List<SimpleTerrainVector2Int> GetTileNeighbours(SimpleTerrainVector2Int point) {
-        var height = data.GetHeight(point);
-        List<SimpleTerrainVector2Int> result = new();
-        foreach(var offset in tileNeighbourOffsets) {
-            if(point.x + offset.x < 0 || point.x + offset.x >= data.sizeX) continue;
-            if(point.z + offset.z < 0 || point.z + offset.z >= data.sizeZ) continue;
-            SimpleTerrainVector2Int neighbour = point + offset;
-            var neighbourHeight = data.GetHeight(neighbour);
-            if(neighbourHeight == height) result.Add(neighbour);
+    public readonly void RebuildMesh(Mesh mesh) {
+        List<Vector3> vertexPositions = new();
+        List<Vector3> vertexUVs = new();
+        List<Vector3> normals = new();
+
+        void AddUVs(int layer,bool randomUVs = false) {
+            int index = randomUVs ? UnityEngine.Random.Range(0,QuadUVs.GetLength(1)) : 0;
+            for(int i = 0;i < QuadUVs.GetLength(0);i += 1) {
+                var uv = QuadUVs[i,index];
+                vertexUVs.Add(new(uv.x,uv.y,layer));
+            }
         }
-        return result;
+
+        void AddNormals(Vector3 normal,int count = 6) {
+            for(int i = 0;i < count;i += 1) {
+                normals.Add(normal);
+            }
+        }
+
+        for(int z = 0;z < sizeZ;z += 1) {
+            for(int x = 0;x < sizeX;x += 1) {
+                int height = GetHeight(x,z);
+
+                vertexPositions.Add(new(x + 0f,height,z + 0f));
+                vertexPositions.Add(new(x + 0f,height,z + 1f));
+                vertexPositions.Add(new(x + 1f,height,z + 1f));
+                vertexPositions.Add(new(x + 0f,height,z + 0f));
+                vertexPositions.Add(new(x + 1f,height,z + 1f));
+                vertexPositions.Add(new(x + 1f,height,z + 0f));
+                AddUVs(TextureGrassTopLayerIndex,true);
+                AddNormals(Vector3.up);
+
+                for(int y = height;y > GetHeight(x,z - 1);y -= 1) {
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.back);
+                }
+                for(int y = height;y > GetHeight(x,z + 1);y -= 1) {
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.forward);
+                }
+                for(int y = height;y > GetHeight(x - 1,z);y -= 1) {
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
+                    vertexPositions.Add(new(x + 0f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 0f));
+                    vertexPositions.Add(new(x + 0f,y - 1f,z + 1f));
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.left);
+                }
+                for(int y = height;y > GetHeight(x + 1,z);y -= 1) {
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 1f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
+                    vertexPositions.Add(new(x + 1f,y - 0f,z + 0f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 1f));
+                    vertexPositions.Add(new(x + 1f,y - 1f,z + 0f));
+                    AddUVs(y == height ? TextureGrassSideLayerindex : TextureStoneLayerIndex,y < height);
+                    AddNormals(Vector3.right);
+                }
+            }
+        }
+
+        List<int> triangleVertexIndicies = new();
+        for(int i = 0;i < vertexPositions.Count;i += 1) {
+            triangleVertexIndicies.Add(i);
+        }
+
+        mesh.Clear();
+        mesh.name = "Terrain";
+        mesh.SetVertices(vertexPositions);
+        mesh.SetUVs(0,vertexUVs);
+        mesh.SetTriangles(triangleVertexIndicies,0);
+        mesh.SetNormals(normals);
+        mesh.UploadMeshData(false);
     }
-
-    //Implements A* algorithm from https://en.wikipedia.org/wiki/A*_search_algorithm.
-    public List<SimpleTerrainVector2Int> FindPath(SimpleTerrainVector2Int start,SimpleTerrainVector2Int end) {
-        Dictionary<SimpleTerrainVector2Int,SimpleTerrainVector2Int> cameFromDict = new();
-        TileComparer tileComparer = new();
-        SortedSet<SimpleTerrainVector2Int> openSet = new(tileComparer) { start };
-        Dictionary<SimpleTerrainVector2Int,float> gScore = new() { [start] = 0f };
-
-        while(openSet.Count > 0) {
-            var current = openSet.First();
-            if(current == end) {
-                List<SimpleTerrainVector2Int> result = new() { current };
-                while(cameFromDict.ContainsKey(current)) {
-                    current = cameFromDict[current];
-                    result.Prepend(current);
-                }
-                return result;
-            }
-            openSet.Remove(current);
-            foreach(var neighbour in GetTileNeighbours(current)) {
-                float gScoreCurrent = float.PositiveInfinity;
-                if(gScore.ContainsKey(current)) gScoreCurrent = gScore[current];
-                float gScoreNeighbour = float.PositiveInfinity;
-                if(gScore.ContainsKey(neighbour)) gScoreNeighbour = gScore[neighbour];
-
-                var newGScore = gScoreCurrent + SimpleTerrainVector2Int.EuclideanDistance(current,neighbour);
-                if(newGScore < gScoreNeighbour) {
-                    cameFromDict[neighbour] = current;
-                    gScore[neighbour] = newGScore;
-                    tileComparer.fScore[neighbour] = newGScore + SimpleTerrainVector2Int.EuclideanDistance(neighbour,end);
-                    if(!openSet.Contains(neighbour)) {
-                        openSet.Add(neighbour);
-                    }
-                }
-            }
-        }
-        return new();
-    }*/
 }
