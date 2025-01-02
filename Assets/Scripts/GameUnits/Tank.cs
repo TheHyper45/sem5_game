@@ -1,12 +1,9 @@
 using System;
 using UnityEngine;
-using System.Runtime.CompilerServices;
 
 public class Tank : MonoBehaviour {
     public float moveSpeed;
     public int maxHealth;
-    public int damage;
-    public float roundsPerSecond;
 
     [SerializeField]
     protected Animator rightTreadAnimation,leftTreadAnimation;
@@ -21,19 +18,19 @@ public class Tank : MonoBehaviour {
 
     [NonSerialized,HideInInspector]
     public int health;
-    [NonSerialized,HideInInspector]
-    public TankGun currentGun;
 
+    public TankGun CurrentGun { get; private set; }
     public Rigidbody Rigidbody { get; private set; }
     public Collider[] BulletIgnoreColliders { get; private set; }
-    public float ShootCooldown { get; private set; } = float.MaxValue;
+    public Collider[] BulletGunIgnoreColliders { get; private set; }
 
     public readonly Quaternion gunFixRotation = Quaternion.Euler(90f,0f,0f);
 
     protected virtual void Awake() {
         Rigidbody = GetComponent<Rigidbody>();
         BulletIgnoreColliders = GetComponentsInChildren<Collider>(true);
-        SwitchGun(GameState.instance.singleBarrelTowerPrefab);
+        SwitchGun(GameState.instance.machineGunPrefab);
+        BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);
     }
 
     protected virtual void Start() {
@@ -42,18 +39,13 @@ public class Tank : MonoBehaviour {
     }
 
     protected virtual void FixedUpdate() {
-        ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime * Time.timeScale,1f / roundsPerSecond);
+
     }
 
     public void SwitchGun(TankGun gunPrefab) {
-        if(currentGun) Destroy(currentGun);
-        currentGun = Instantiate(gunPrefab,gunSpawnPoint.position,gunFixRotation,gunSpawnPoint);
-    }
-
-    public void Shoot() {
-        if(ShootCooldown < 1f / roundsPerSecond) return;
-        currentGun.SpawnBullets();
-        ShootCooldown = 0f;
+        if(CurrentGun) Destroy(CurrentGun);
+        CurrentGun = Instantiate(gunPrefab,gunSpawnPoint.position,gunFixRotation,gunSpawnPoint);
+        BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);
     }
 
     public void Hit(int damage) {
@@ -68,9 +60,9 @@ public class Tank : MonoBehaviour {
         foreach(var obj in ragdollAddRigidbodyObjects) {
             obj.AddComponent<Rigidbody>().mass = 500;
         }
-        if(currentGun) currentGun.gameObject.AddComponent<Rigidbody>().mass = 500;
+        if(CurrentGun) CurrentGun.gameObject.AddComponent<Rigidbody>().mass = 500;
 
-        gameObject.AddComponent<SimpleRagdoll>().Init(5f);
+        gameObject.AddComponent<SimpleRagdoll>().Init(1.5f);
         Destroy(Rigidbody);
         Destroy(this);
     }

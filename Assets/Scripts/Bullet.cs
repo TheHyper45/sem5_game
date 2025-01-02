@@ -19,13 +19,20 @@ public class Bullet : MonoBehaviour {
         if(timer >= 0.333f) Destroy(gameObject);
     }
 
-    public void Init(int _damage,Collider[] parentIgnoreColliders) {
+    public void Init(int _damage,Collider[] parentIgnoreColliders,Collider[] parentIgnoreColliders2) {
         if(startTimer) return;
         damage = _damage;
         startTimer = true;
         rigidbody.AddForce(transform.forward * 30f,ForceMode.VelocityChange);
-        foreach(var parentCollider in parentIgnoreColliders) {
-            Physics.IgnoreCollision(Collider,parentCollider);
+        if(parentIgnoreColliders != null) {
+            foreach(var parentCollider in parentIgnoreColliders) {
+                Physics.IgnoreCollision(Collider,parentCollider);
+            }
+        }
+        if(parentIgnoreColliders2 != null) {
+            foreach(var parentCollider in parentIgnoreColliders2) {
+                Physics.IgnoreCollision(Collider,parentCollider);
+            }
         }
     }
 
@@ -34,12 +41,12 @@ public class Bullet : MonoBehaviour {
         if(topParent.TryGetComponent(out Tank drivableGameUnit)) {
             drivableGameUnit.Hit(damage);
         }
-        else if(collision.gameObject.TryGetComponent(out Eagle eagle)) {
-            eagle.Hit(damage);
+        else if(collision.gameObject.TryGetComponent(out SpawnBase spawnBase)) {
+            spawnBase.Hit(damage);
         }
         else if(collision.gameObject.TryGetComponent(out DestroyableBlock destroyableBlock)) {
             var dir = transform.forward;
-            dir.y = 0f;
+            dir.y = 0.5f;
             destroyableBlock.Hit(damage,dir,10f);
         }
         Destroy(gameObject);

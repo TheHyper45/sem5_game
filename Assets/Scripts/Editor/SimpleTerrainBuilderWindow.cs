@@ -27,7 +27,7 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
     }
 
     private void UpdateTerrain() {
-        terrainData.RebuildMesh(terrainMesh);
+        SimpleTerrain.RebuildMesh(terrainData,terrainMesh);
         terrainGameObject.GetComponent<MeshFilter>().sharedMesh = terrainMesh;
         terrainGameObject.GetComponent<MeshRenderer>().material = terrainMaterial;
         terrainGameObject.GetComponent<MeshCollider>().sharedMesh = terrainMesh;
@@ -49,7 +49,7 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
         RestoreCameraTransform();
 
         GameObject light = new("SunLight");
-        light.transform.SetPositionAndRotation(new(-1f,3f,-1f),Quaternion.Euler(0f,-140f,0f));
+        light.transform.SetPositionAndRotation(new(0f,3f,0f),Quaternion.Euler(50f,-30f,0f));
         var lightComponent = light.AddComponent<Light>();
         lightComponent.type = LightType.Directional;
         lightComponent.intensity = 1f;
@@ -60,9 +60,9 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
             editTerrainSizeX = 16;
             editTerrainSizeZ = 16;
             nextSelectedTiles = new();
-            terrainMaterial = Resources.Load<Material>("Images/Materials/TerrainMaterial");
+            terrainMaterial = Resources.Load<Material>("Images/Materials/Terrain");
             terrainMesh = new();
-            terrainData = new() { sizeX = editTerrainSizeX,sizeZ = editTerrainSizeZ,heights = new int[editTerrainSizeX * editTerrainSizeZ] };
+            terrainData = new() { sizeX = editTerrainSizeX,sizeZ = editTerrainSizeZ,heights = new int[editTerrainSizeX * editTerrainSizeZ],types = new int[editTerrainSizeX * editTerrainSizeZ] };
             UpdateTerrain();
         }
     }
@@ -154,6 +154,7 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
                     UpdateTerrain();
                 }
             }
+            Handles.PositionHandle(new(-1f,0f,-1f),Quaternion.identity);
         }
 
         preview.EndAndDrawPreview(pos);
@@ -161,21 +162,21 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
             RestoreCameraTransform();
         }
         if(GUILayout.Button("New Terrain",GUILayout.ExpandWidth(false))) {
-            terrainData = new() { sizeX = editTerrainSizeX,sizeZ = editTerrainSizeZ,heights = new int[editTerrainSizeX * editTerrainSizeZ] };
+            terrainData = new() { sizeX = editTerrainSizeX,sizeZ = editTerrainSizeZ,heights = new int[editTerrainSizeX * editTerrainSizeZ],types = new int[editTerrainSizeX * editTerrainSizeZ] };
             UpdateTerrain();
         }
         GUILayout.Label($"Terrain Size: ({terrainData.sizeX},{terrainData.sizeZ})");
 
-        GUILayout.BeginHorizontal();
-        if(GUILayout.Button("Resize Terrain",GUILayout.ExpandWidth(false))) {
-            terrainData.Resize(editTerrainSizeX,editTerrainSizeZ);
-            UpdateTerrain();
+        using(new GUILayout.HorizontalScope()) {
+            if(GUILayout.Button("Resize Terrain",GUILayout.ExpandWidth(false))) {
+                terrainData.Resize(editTerrainSizeX,editTerrainSizeZ);
+                UpdateTerrain();
+            }
+            var stringEditTerrainSizeX = GUILayout.TextField(editTerrainSizeX.ToString(),GUILayout.ExpandWidth(false));
+            int.TryParse(stringEditTerrainSizeX,out editTerrainSizeX);
+            var stringEditTerrainSizeZ = GUILayout.TextField(editTerrainSizeZ.ToString(),GUILayout.ExpandWidth(false));
+            int.TryParse(stringEditTerrainSizeZ,out editTerrainSizeZ);
         }
-        var stringEditTerrainSizeX = GUILayout.TextField(editTerrainSizeX.ToString(),GUILayout.ExpandWidth(false));
-        int.TryParse(stringEditTerrainSizeX,out editTerrainSizeX);
-        var stringEditTerrainSizeZ = GUILayout.TextField(editTerrainSizeZ.ToString(),GUILayout.ExpandWidth(false));
-        int.TryParse(stringEditTerrainSizeZ,out editTerrainSizeZ);
-        GUILayout.EndHorizontal();
 
         if(GUILayout.Button("Save Terrain",GUILayout.ExpandWidth(false))) {
             var path = EditorUtility.SaveFilePanel("Save Terrain Asset","Assets/Resources/Levels","Default","asset");

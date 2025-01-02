@@ -16,7 +16,7 @@ public class PlayerTank : Tank {
         if(instance != null) {
             setInstanceToNullOnDestruction = false;
             Destroy(gameObject);
-            Debug.LogError("At most one instance of \"PlayerTank\" can be present on scene at any moment.");
+            Debug.LogError("At most one instance of \"PlayerTank\" can exist at any given moment.");
         }
         else instance = this;
     }
@@ -28,19 +28,19 @@ public class PlayerTank : Tank {
 
     private void Update() {
         playerUI.SetHealthPercent((float)health / maxHealth);
-        Vector3 cameraPos = new(currentGun.transform.position.x,currentGun.transform.position.y + 15f,currentGun.transform.position.z);
+        Vector3 cameraPos = new(CurrentGun.transform.position.x,CurrentGun.transform.position.y + 15f,CurrentGun.transform.position.z);
         Camera.main.transform.SetPositionAndRotation(cameraPos,cameraFixRotation);
         var targetRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if(Physics.RaycastNonAlloc(targetRay,mouseRaycastHits) > 0) {
             var vector = mouseRaycastHits[0].point - transform.position;
             vector.y = 0f;
-            currentGun.transform.rotation = Quaternion.LookRotation(vector) * gunFixRotation;
+            CurrentGun.transform.rotation = Quaternion.LookRotation(vector) * gunFixRotation;
         }
     }
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
-        if(Input.GetKey(KeyCode.Mouse0)) Shoot();
+        if(Input.GetKey(KeyCode.Mouse0)) CurrentGun.Shoot();
         float moveStep = Time.fixedDeltaTime * Time.timeScale;
         float moveX = 0f;
         float moveZ = 0f;
