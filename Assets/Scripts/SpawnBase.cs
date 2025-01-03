@@ -23,8 +23,7 @@ public class SpawnBase : MonoBehaviour {
 
     private int health;
     private float timer = 0f;
-
-    private static readonly List<SpawnBase> spawnBases = new();
+    public static readonly List<SpawnBase> spawnBases = new();
 
     private void Awake() {
         spawnBases.Add(this);
@@ -32,10 +31,6 @@ public class SpawnBase : MonoBehaviour {
 
     private void OnDestroy() {
         spawnBases.Remove(this);
-        if(spawnBases.Count == 0) {
-            Instantiate(GameState.instance.levelCompletedMenuPrefab,Vector3.zero,Quaternion.identity);
-            Time.timeScale = 0f;
-        }
     }
 
     private void Start() {

@@ -46,4 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   machineGunPrefab: {fileID: 7888914922965289145, guid: 63984fc324ae5564186c937abbf5bc43, type: 3}
   bulletPrefab: {fileID: -6794541840949548779, guid: e1ebd935662283a468e6723b2630669c, type: 3}
-  levelCompletedMenuPrefab: {fileID: 7138606345343745119, guid: 5539e287f6e26b8409643bb351026953, type: 3}
+  moneyPickupPrefab: {fileID: 2806469630733529159, guid: 49dedbe60823b7645bcd86871b9b3621, type: 3}

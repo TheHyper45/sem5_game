@@ -5,6 +5,8 @@ using System.Globalization;
 
 public class ShopMenu : MonoBehaviour {
     [SerializeField]
+    private MainMenu mainMenu;
+    [SerializeField]
     private PlayMenu playMenu;
     [SerializeField]
     private Button goBackToPlayMenuButton;
@@ -17,7 +19,7 @@ public class ShopMenu : MonoBehaviour {
             gameObject.SetActive(false);
         });
         if(!GameState.instance.IsGameSaveDataLoaded()) {
-            playMenu.gameObject.SetActive(true);
+            mainMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
             return;
         }

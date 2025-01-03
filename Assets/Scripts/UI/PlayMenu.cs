@@ -11,6 +11,8 @@ public class PlayMenu : MonoBehaviour {
     [SerializeField]
     private MainMenu mainMenu;
     [SerializeField]
+    private SaveFileMenu saveFileMenu;
+    [SerializeField]
     private ShopMenu shopMenu;
     [SerializeField]
     private SceneLoadingScreen sceneLoadingScreen;
@@ -20,7 +22,7 @@ public class PlayMenu : MonoBehaviour {
     private void Awake() {
         goBackButton.onClick.AddListener(() => {
             GameState.instance.ClearSaveData();
-            mainMenu.gameObject.SetActive(true);
+            saveFileMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
         shopMenuButton.onClick.AddListener(() => {

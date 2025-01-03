@@ -27,7 +27,7 @@ public class TankMachineGun : TankGun {
         base.FixedUpdate();
         for(int i = 0;i < cannons.Length;i += 1) {
             var cannon = cannons[i];
-            cannon.cannon.localPosition = Vector3.Lerp(cannon.cannon.localPosition,cannon.initialPos,Time.fixedDeltaTime * roundsPerSecond / 2f);
+            cannon.cannon.localPosition = Vector3.Lerp(cannon.cannon.localPosition,cannon.initialPos,Time.fixedDeltaTime * baseRoundsPerSecond / 2f);
         }
     }
 
@@ -36,7 +36,7 @@ public class TankMachineGun : TankGun {
         var cannon = cannons[currentCannonIndex];
         currentCannonIndex = (currentCannonIndex + 1) % cannons.Length;
         var bullet = Instantiate(GameState.instance.bulletPrefab,cannon.bulletSpawnPoint.position,cannon.bulletSpawnPoint.rotation);
-        bullet.Init(damage,parentDrivableUnit.BulletIgnoreColliders,parentDrivableUnit.BulletGunIgnoreColliders);
+        bullet.Init(baseDamage,parentDrivableUnit.BulletIgnoreColliders,parentDrivableUnit.BulletGunIgnoreColliders);
         cannon.cannon.localPosition = cannon.recoilMovePoint.localPosition;
     }
 }

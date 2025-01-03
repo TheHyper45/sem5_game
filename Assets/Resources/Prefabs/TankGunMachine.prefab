@@ -685,9 +685,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb752db91255de469d2acf836e54e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roundsPerSecond: 5
-  damage: 7
-  bulletPrefab: {fileID: -6794541840949548779, guid: e1ebd935662283a468e6723b2630669c, type: 3}
+  baseRoundsPerSecond: 5
+  baseDamage: 7
   cannons:
   - bulletSpawnPoint: {fileID: 1734349118893364697}
     recoilMovePoint: {fileID: 5895957262090005082}

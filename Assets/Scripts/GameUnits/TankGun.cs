@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class TankGun : MonoBehaviour {
     [SerializeField]
-    protected float roundsPerSecond;
+    protected float baseRoundsPerSecond;
     [SerializeField]
-    protected int damage;
+    protected int baseDamage;
 
     public float ShootCooldown { get; protected set; } = float.MaxValue;
     protected Tank parentDrivableUnit;
@@ -14,11 +14,11 @@ public class TankGun : MonoBehaviour {
     }
 
     protected virtual void FixedUpdate() {
-        ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime * Time.timeScale,1f / roundsPerSecond);
+        ShootCooldown = Mathf.Min(ShootCooldown + Time.fixedDeltaTime * Time.timeScale,1f / baseRoundsPerSecond);
     }
 
     public void Shoot() {
-        if(ShootCooldown < 1f / roundsPerSecond) return;
+        if(ShootCooldown < 1f / baseRoundsPerSecond) return;
         ShootCooldown = 0f;
         SpawnBullets();
     }

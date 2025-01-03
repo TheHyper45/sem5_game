@@ -20,7 +20,7 @@ public class GameState : MonoBehaviour {
 
     public TankGun machineGunPrefab;
     public Bullet bulletPrefab;
-    public LevelCompletedMenu levelCompletedMenuPrefab;
+    public MoneyPickup moneyPickupPrefab;
 
     private string saveFilePath = "";
     private GameSaveDataJson gameSaveDataJson;
@@ -31,10 +31,11 @@ public class GameState : MonoBehaviour {
         return gameSaveDataJson.levelDatas[index];
     }
 
-    public void MarkLevelCompleted(string levelName,int score = 1) {
+    public void MarkLevelCompleted(string levelName,int moneyIncrement,int score = 1) {
         var index = gameSaveDataJson.levelDatas.FindIndex((item) => item.name == levelName);
         if(index < 0) {
             gameSaveDataJson.levelDatas.Add(new() { name = levelName,completed = true,score = score });
+            gameSaveDataJson.money += moneyIncrement;
             SaveGameSaveData();
             return;
         }
@@ -42,6 +43,7 @@ public class GameState : MonoBehaviour {
         data.completed = true;
         data.score = score;
         gameSaveDataJson.levelDatas[index] = data;
+        gameSaveDataJson.money += moneyIncrement;
         SaveGameSaveData();
     }
 
@@ -49,10 +51,10 @@ public class GameState : MonoBehaviour {
         return gameSaveDataJson.money;
     }
 
-    public void AddMoney(int amount) {
+    /*public void AddMoney(int amount) {
         gameSaveDataJson.money += amount;
         SaveGameSaveData();
-    }
+    }*/
 
     public bool TakeMoney(int amount) {
         if(gameSaveDataJson.money < amount) return false;
@@ -70,16 +72,20 @@ public class GameState : MonoBehaviour {
         saveFilePath = "";
     }
 
+    public GameSaveDataJson CreateSaveFile(string filePath) {
+        GameSaveDataJson json = new() { levelDatas = new() };
+        json.levelDatas.Add(new() { name = "Level1",completed = false,score = 0 });
+        File.WriteAllText(filePath,JsonUtility.ToJson(json));
+        return json;
+    }
+
     public void LoadGameSaveData(string filePath) {
         try {
             gameSaveDataJson = JsonUtility.FromJson<GameSaveDataJson>(File.ReadAllText(filePath));
             saveFilePath = filePath;
         }
         catch(FileNotFoundException) {
-            GameSaveDataJson json = new() { levelDatas = new() };
-            json.levelDatas.Add(new() { name = "Level1",completed = false,score = 0 });
-            File.WriteAllText(filePath,JsonUtility.ToJson(json));
-            gameSaveDataJson = json;
+            gameSaveDataJson = CreateSaveFile(filePath);
             saveFilePath = filePath;
         }
     }

@@ -687,10 +687,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b75c4a57e239f34798efd90a323134a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
-  maxHealth: 40
-  damage: 7
-  roundsPerSecond: 5
+  baseMoveSpeed: 4
+  baseMaxHealth: 40
   rightTreadAnimation: {fileID: 7078619910819505332}
   leftTreadAnimation: {fileID: 7598210167705218427}
   ragdollDestroyObjects:

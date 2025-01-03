@@ -2,8 +2,8 @@ using System;
 using UnityEngine;
 
 public class Tank : MonoBehaviour {
-    public float moveSpeed;
-    public int maxHealth;
+    public float baseMoveSpeed;
+    public int baseMaxHealth;
 
     [SerializeField]
     protected Animator rightTreadAnimation,leftTreadAnimation;
@@ -34,8 +34,8 @@ public class Tank : MonoBehaviour {
     }
 
     protected virtual void Start() {
-        health = maxHealth;
-        healthBar.SetValue((float)health / maxHealth);
+        health = baseMaxHealth;
+        healthBar.SetValue((float)health / baseMaxHealth);
     }
 
     protected virtual void FixedUpdate() {
@@ -51,9 +51,12 @@ public class Tank : MonoBehaviour {
     public void Hit(int damage) {
         if(health <= 0) return;
         health -= damage;
-        healthBar.SetValue((float)health / maxHealth);
+        healthBar.SetValue((float)health / baseMaxHealth);
         if(health > 0) return;
 
+        if(this is EnemyTank) {
+            Instantiate(GameState.instance.moneyPickupPrefab,transform.position + new Vector3(0f,0.5f,0f),Quaternion.identity);
+        }
         foreach(var obj in ragdollDestroyObjects) {
             Destroy(obj);
         }

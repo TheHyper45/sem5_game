@@ -5,7 +5,7 @@ public class HealthPickup : Pickup {
     private int healthIncrement;
 
     public override void Collect(Tank tank) {
-        tank.health = Mathf.Clamp(tank.health + healthIncrement,0,tank.maxHealth);
+        tank.health = Mathf.Clamp(tank.health + healthIncrement,0,tank.baseMaxHealth);
         base.Collect(tank);
     }
 }

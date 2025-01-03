@@ -44,10 +44,10 @@ public class EnemyTank : Tank {
 
         var treadAnimationSpeed = 0f;
         if(currentPathPointIndex < path.corners.Length) {
-            treadAnimationSpeed = moveSpeed * 1.2f;
+            treadAnimationSpeed = baseMoveSpeed * 1.2f;
 
             var nextPathPoint = path.corners[currentPathPointIndex];
-            var newPosition = Vector3.MoveTowards(transform.position,nextPathPoint,moveSpeed * moveStep);
+            var newPosition = Vector3.MoveTowards(transform.position,nextPathPoint,baseMoveSpeed * moveStep);
             Rigidbody.MovePosition(newPosition);
 
             if(Vector3.Distance(newPosition,nextPathPoint) > 0.01f) {

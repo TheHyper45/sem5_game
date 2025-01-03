@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerTank : Tank {
@@ -5,6 +6,9 @@ public class PlayerTank : Tank {
     private PlayerUI playerUI;
 
     public static PlayerTank instance;
+
+    [NonSerialized,HideInInspector]
+    public int collectedMoney;
 
     private readonly Quaternion cameraFixRotation = Quaternion.Euler(90f,0f,0f);
     private readonly RaycastHit[] mouseRaycastHits = new RaycastHit[1];
@@ -27,7 +31,7 @@ public class PlayerTank : Tank {
     }
 
     private void Update() {
-        playerUI.SetHealthPercent((float)health / maxHealth);
+        playerUI.SetHealthPercent((float)health / baseMaxHealth);
         Vector3 cameraPos = new(CurrentGun.transform.position.x,CurrentGun.transform.position.y + 15f,CurrentGun.transform.position.z);
         Camera.main.transform.SetPositionAndRotation(cameraPos,cameraFixRotation);
         if(Mathf.Abs(Time.timeScale) >= 0.001f) {
@@ -61,10 +65,10 @@ public class PlayerTank : Tank {
         bool isMoving = Mathf.Abs(moveX) + Mathf.Abs(moveZ) > 0.0001f;
         if(isMoving) {
             var moveVector = (moveX * Camera.main.transform.up + moveZ * Camera.main.transform.right).normalized;
-            Rigidbody.MovePosition(transform.position + moveSpeed * moveStep * moveVector);
+            Rigidbody.MovePosition(transform.position + baseMoveSpeed * moveStep * moveVector);
             Rigidbody.MoveRotation(Quaternion.Slerp(transform.rotation,Quaternion.LookRotation(moveVector),moveStep * 4f));
         }
-        float treadAnimationSpeed = isMoving ? moveSpeed * 1.2f : 0f;
+        float treadAnimationSpeed = isMoving ? baseMoveSpeed * 1.2f : 0f;
         rightTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
         leftTreadAnimation.SetFloat("MoveSpeed",treadAnimationSpeed);
     }
