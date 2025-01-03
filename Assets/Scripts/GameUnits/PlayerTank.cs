@@ -30,11 +30,13 @@ public class PlayerTank : Tank {
         playerUI.SetHealthPercent((float)health / maxHealth);
         Vector3 cameraPos = new(CurrentGun.transform.position.x,CurrentGun.transform.position.y + 15f,CurrentGun.transform.position.z);
         Camera.main.transform.SetPositionAndRotation(cameraPos,cameraFixRotation);
-        var targetRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if(Physics.RaycastNonAlloc(targetRay,mouseRaycastHits) > 0) {
-            var vector = mouseRaycastHits[0].point - transform.position;
-            vector.y = 0f;
-            CurrentGun.transform.rotation = Quaternion.LookRotation(vector) * gunFixRotation;
+        if(Mathf.Abs(Time.timeScale) >= 0.001f) {
+            var targetRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if(Physics.RaycastNonAlloc(targetRay,mouseRaycastHits) > 0) {
+                var vector = mouseRaycastHits[0].point - transform.position;
+                vector.y = 0f;
+                CurrentGun.transform.rotation = Quaternion.LookRotation(vector) * gunFixRotation;
+            }
         }
     }
 

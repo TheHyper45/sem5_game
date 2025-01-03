@@ -1,34 +1,62 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class PlayMenu : MonoBehaviour {
-    [Serializable]
-    public struct LevelButton {
-        public Button button;
-        public string levelName;
-    }
-
     [SerializeField]
     private Button goBackButton;
     [SerializeField]
+    private Button shopMenuButton;
+    [SerializeField]
     private MainMenu mainMenu;
     [SerializeField]
-    private SceneLoadingScreen sceneLoadingScreen;
+    private ShopMenu shopMenu;
     [SerializeField]
-    private LevelButton[] levels;
+    private SceneLoadingScreen sceneLoadingScreen;
+
+    private LevelSelectButton[] levelSelectButtons;
 
     private void Awake() {
         goBackButton.onClick.AddListener(() => {
+            GameState.instance.ClearSaveData();
             mainMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
-        foreach(var item in levels) {
-            item.button.onClick.AddListener(() => {
-                StartCoroutine(LoadSceneAsync(item.levelName));
+        shopMenuButton.onClick.AddListener(() => {
+            shopMenu.gameObject.SetActive(true);
+            gameObject.SetActive(false);
+        });
+        levelSelectButtons = GetComponentsInChildren<LevelSelectButton>();
+        foreach(var button in levelSelectButtons) {
+            button.button.onClick.AddListener(() => {
+                StartCoroutine(LoadSceneAsync(button.levelName));
             });
+        }
+    }
+
+    private void OnEnable() {
+        if(!GameState.instance.IsGameSaveDataLoaded()) {
+            mainMenu.gameObject.SetActive(true);
+            gameObject.SetActive(false);
+            return;
+        }
+        bool firstLevelCompleted = false;
+        foreach(var button in levelSelectButtons) {
+            var data = GameState.instance.GetLevelData(button.levelName);
+            if(button.levelName == "Level1") {
+                firstLevelCompleted = data.completed;
+                button.button.interactable = true;
+                button.starImage.enabled = firstLevelCompleted;
+            }
+            else if(!firstLevelCompleted) {
+                button.button.interactable = false;
+                button.starImage.enabled = false;
+            }
+            else {
+                button.button.interactable = true;
+                button.starImage.enabled = data.completed;
+            }
         }
     }
 

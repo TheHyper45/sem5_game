@@ -15,6 +15,7 @@ public class MainMenu : MonoBehaviour {
 
     private void Awake() {
         playButton.onClick.AddListener(() => {
+            GameState.instance.LoadGameSaveData(Application.persistentDataPath + "/save0.json");
             playMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
@@ -25,5 +26,9 @@ public class MainMenu : MonoBehaviour {
         quitButton.onClick.AddListener(() => {
             Application.Quit();
         });
+        if(GameState.instance.IsGameSaveDataLoaded()) {
+            playMenu.gameObject.SetActive(true);
+            gameObject.SetActive(false);
+        }
     }
 }
