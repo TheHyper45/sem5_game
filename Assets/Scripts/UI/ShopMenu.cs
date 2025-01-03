@@ -12,6 +12,10 @@ public class ShopMenu : MonoBehaviour {
     private Button goBackToPlayMenuButton;
     [SerializeField]
     private TMP_Text moneyText;
+    [SerializeField]
+    private Transform shopUpgradeInstanceUIParent;
+    [SerializeField]
+    private ShopUpgradeInstanceUI shopUpgradeInstanceUIPrefab;
 
     private void Awake() {
         goBackToPlayMenuButton.onClick.AddListener(() => {
@@ -27,6 +31,15 @@ public class ShopMenu : MonoBehaviour {
 
     private void OnEnable() {
         var moneyString = GameState.instance.GetMoney().ToString(CultureInfo.InvariantCulture);
-        moneyText.text = $"Money: {moneyString}";
+        moneyText.text = $"Money: ${moneyString}";
+
+        foreach(var element in shopUpgradeInstanceUIParent.GetComponentsInChildren<ShopUpgradeInstanceUI>()) {
+            Destroy(element.gameObject);
+        }
+
+    }
+
+    private void InstantiateShopUpgradeInstanceUI() {
+        var instance = Instantiate(shopUpgradeInstanceUIParent,shopUpgradeInstanceUIParent);
     }
 }

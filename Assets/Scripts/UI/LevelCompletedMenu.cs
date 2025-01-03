@@ -30,14 +30,14 @@ public class LevelCompletedMenu : MonoBehaviour {
         if(GameState.instance.IsGameSaveDataLoaded()) {
             GameState.instance.MarkLevelCompleted(SceneManager.GetActiveScene().name,collectedMoneyAmount);
         }
-        StartCoroutine(ShowMenu(3f));
+        StartCoroutine(ShowMenu(1.5f));
         levelHasEnded = true;
     }
 
     private IEnumerator ShowMenu(float time) {
         yield return new WaitForSeconds(time);
         canvas.gameObject.SetActive(true);
-        collectedMoneyText.text = $"Money: {collectedMoneyAmount}";
+        collectedMoneyText.text = $"Collected: ${collectedMoneyAmount}";
         Time.timeScale = 0f;
     }
 }

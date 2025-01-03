@@ -6,12 +6,18 @@ using System.Collections.Generic;
 [Serializable]
 public struct GameSaveDataJson {
     [Serializable]
+    public struct UpgradeDataJson {
+        public string name;
+        public int level;
+    }
+    [Serializable]
     public struct LevelDataJson {
         public string name;
         public bool completed;
         public int score;
     }
     public List<LevelDataJson> levelDatas;
+    public List<UpgradeDataJson> upgradeDatas;
     public int money;
 }
 
@@ -50,11 +56,6 @@ public class GameState : MonoBehaviour {
     public int GetMoney() {
         return gameSaveDataJson.money;
     }
-
-    /*public void AddMoney(int amount) {
-        gameSaveDataJson.money += amount;
-        SaveGameSaveData();
-    }*/
 
     public bool TakeMoney(int amount) {
         if(gameSaveDataJson.money < amount) return false;

@@ -16,7 +16,7 @@ public class PlayerUI : MonoBehaviour {
     private void Update() {
         if(cachedCollectedMoney != PlayerTank.instance.collectedMoney) {
             cachedCollectedMoney = PlayerTank.instance.collectedMoney;
-            collectedMoneyText.text = $"Money: {cachedCollectedMoney}";
+            collectedMoneyText.text = $"Money: ${cachedCollectedMoney}";
         }
         currentValue = Mathf.Lerp(currentValue,targetValue,Time.deltaTime * 5f);
         healthBar.value = currentValue;
