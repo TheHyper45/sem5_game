@@ -41,7 +41,7 @@ public class Bullet : MonoBehaviour {
         if(topParent.TryGetComponent(out Tank drivableGameUnit)) {
             drivableGameUnit.Hit(damage);
         }
-        else if(collision.gameObject.TryGetComponent(out SpawnBase spawnBase)) {
+        else if(collision.gameObject.TryGetComponent(out EnemySpawnBase spawnBase)) {
             spawnBase.Hit(damage);
         }
         else if(collision.gameObject.TryGetComponent(out DestroyableBlock destroyableBlock)) {

@@ -27,7 +27,7 @@ public class MainMenu : MonoBehaviour {
         quitButton.onClick.AddListener(() => {
             Application.Quit();
         });
-        if(GameState.instance.IsGameSaveDataLoaded()) {
+        if(SaveFile.IsLoaded()) {
             playMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         }

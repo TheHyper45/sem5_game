@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 
-public class SpawnBase : MonoBehaviour {
+public class EnemySpawnBase : MonoBehaviour {
     [Serializable]
     private class SpawnPoint {
         public Transform point;
@@ -23,7 +23,7 @@ public class SpawnBase : MonoBehaviour {
 
     private int health;
     private float timer = 0f;
-    public static readonly List<SpawnBase> spawnBases = new();
+    public static readonly List<EnemySpawnBase> spawnBases = new();
 
     private void Awake() {
         spawnBases.Add(this);

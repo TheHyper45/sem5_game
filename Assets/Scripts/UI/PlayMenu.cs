@@ -21,7 +21,7 @@ public class PlayMenu : MonoBehaviour {
 
     private void Awake() {
         goBackButton.onClick.AddListener(() => {
-            GameState.instance.ClearSaveData();
+            SaveFile.Unload();
             saveFileMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
@@ -38,14 +38,9 @@ public class PlayMenu : MonoBehaviour {
     }
 
     private void OnEnable() {
-        if(!GameState.instance.IsGameSaveDataLoaded()) {
-            mainMenu.gameObject.SetActive(true);
-            gameObject.SetActive(false);
-            return;
-        }
         bool firstLevelCompleted = false;
         foreach(var button in levelSelectButtons) {
-            var data = GameState.instance.GetLevelData(button.levelName);
+            var data = SaveFile.GetLevelData(button.levelName);
             if(button.levelName == "Level1") {
                 firstLevelCompleted = data.completed;
                 button.button.interactable = true;

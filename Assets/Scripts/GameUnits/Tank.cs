@@ -29,7 +29,7 @@ public class Tank : MonoBehaviour {
     protected virtual void Awake() {
         Rigidbody = GetComponent<Rigidbody>();
         BulletIgnoreColliders = GetComponentsInChildren<Collider>(true);
-        SwitchGun(GameState.instance.machineGunPrefab);
+        SwitchGun(ReferenceHub.instance.machineGunPrefab);
         BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);
     }
 
@@ -55,7 +55,7 @@ public class Tank : MonoBehaviour {
         if(health > 0) return;
 
         if(this is EnemyTank) {
-            Instantiate(GameState.instance.moneyPickupPrefab,transform.position + new Vector3(0f,0.5f,0f),Quaternion.identity);
+            Instantiate(ReferenceHub.instance.moneyPickupPrefab,transform.position + new Vector3(0f,0.5f,0f),Quaternion.identity);
         }
         foreach(var obj in ragdollDestroyObjects) {
             Destroy(obj);

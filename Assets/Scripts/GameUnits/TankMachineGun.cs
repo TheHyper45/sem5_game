@@ -35,7 +35,7 @@ public class TankMachineGun : TankGun {
         base.SpawnBullets();
         var cannon = cannons[currentCannonIndex];
         currentCannonIndex = (currentCannonIndex + 1) % cannons.Length;
-        var bullet = Instantiate(GameState.instance.bulletPrefab,cannon.bulletSpawnPoint.position,cannon.bulletSpawnPoint.rotation);
+        var bullet = Instantiate(ReferenceHub.instance.bulletPrefab,cannon.bulletSpawnPoint.position,cannon.bulletSpawnPoint.rotation);
         bullet.Init(baseDamage,parentDrivableUnit.BulletIgnoreColliders,parentDrivableUnit.BulletGunIgnoreColliders);
         cannon.cannon.localPosition = cannon.recoilMovePoint.localPosition;
     }

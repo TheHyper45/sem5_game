@@ -7,9 +7,6 @@ public class PlayerTank : Tank {
 
     public static PlayerTank instance;
 
-    [NonSerialized,HideInInspector]
-    public int collectedMoney;
-
     private readonly Quaternion cameraFixRotation = Quaternion.Euler(90f,0f,0f);
     private readonly RaycastHit[] mouseRaycastHits = new RaycastHit[1];
 

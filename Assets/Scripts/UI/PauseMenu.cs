@@ -29,7 +29,7 @@ public class PauseMenu : MonoBehaviour {
     }
 
     private void Update() {
-        if(Input.GetKeyDown(KeyCode.Escape)) {
+        if(!GameState.instance.GameHasEnded && Input.GetKeyDown(KeyCode.Escape)) {
             pauseMenu.SetActive(!pauseMenu.activeSelf);
             Time.timeScale = pauseMenu.activeSelf ? 0.0f : 1.0f;
         }

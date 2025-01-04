@@ -606,11 +606,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2796235390484419, guid: 46a8a18018dbb0d438bedba92aa42d94, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 2796235390484419, guid: 46a8a18018dbb0d438bedba92aa42d94, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 2796235390484419, guid: 46a8a18018dbb0d438bedba92aa42d94, type: 3}
       propertyPath: m_LocalScale.x
@@ -674,7 +674,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2988343860523042450, guid: 46a8a18018dbb0d438bedba92aa42d94, type: 3}
       propertyPath: m_Name
-      value: ShopUpgradeInstanceUI Variant
+      value: ShopUpgradeInstanceUI
       objectReference: {fileID: 0}
     - target: {fileID: 8882055439481555088, guid: 46a8a18018dbb0d438bedba92aa42d94, type: 3}
       propertyPath: m_Color.b

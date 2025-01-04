@@ -4,11 +4,13 @@ using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class LevelCompletedMenu : MonoBehaviour {
+public class LevelFailedMenu : MonoBehaviour {
     [SerializeField]
     private Canvas canvas;
     [SerializeField]
     private TMP_Text collectedMoneyText;
+    [SerializeField]
+    private Button restartButton;
     [SerializeField]
     private Button goBackButton;
 
@@ -21,11 +23,15 @@ public class LevelCompletedMenu : MonoBehaviour {
 
     private void Awake() {
         canvas.gameObject.SetActive(false);
+        restartButton.onClick.AddListener(() => {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        });
         goBackButton.onClick.AddListener(() => {
             Time.timeScale = 1f;
             SceneManager.LoadScene("MainMenu");
         });
-        SaveFile.MarkLevelCompleted(SceneManager.GetActiveScene().name,GameState.instance.playerCollectedMoney);
+        SaveFile.AddMoney(GameState.instance.playerCollectedMoney);
         StartCoroutine(ShowMenu(1.5f));
     }
 }

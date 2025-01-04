@@ -22,24 +22,21 @@ public class ShopMenu : MonoBehaviour {
             playMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
-        if(!GameState.instance.IsGameSaveDataLoaded()) {
-            mainMenu.gameObject.SetActive(true);
-            gameObject.SetActive(false);
-            return;
-        }
     }
 
     private void OnEnable() {
-        var moneyString = GameState.instance.GetMoney().ToString(CultureInfo.InvariantCulture);
+        var moneyString = SaveFile.GetMoney().ToString(CultureInfo.InvariantCulture);
         moneyText.text = $"Money: ${moneyString}";
 
         foreach(var element in shopUpgradeInstanceUIParent.GetComponentsInChildren<ShopUpgradeInstanceUI>()) {
             Destroy(element.gameObject);
         }
-
+        for(int i = 0;i < 3;i += 1) {
+            InstantiateShopUpgradeInstanceUI();
+        }
     }
 
     private void InstantiateShopUpgradeInstanceUI() {
-        var instance = Instantiate(shopUpgradeInstanceUIParent,shopUpgradeInstanceUIParent);
+        var instance = Instantiate(shopUpgradeInstanceUIPrefab,shopUpgradeInstanceUIParent);
     }
 }

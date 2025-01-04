@@ -28,7 +28,7 @@ public class SaveFileMenu : MonoBehaviour {
             var text = newSaveFileNameInput.text;
             if(string.IsNullOrEmpty(text)) return;
             var filePath = $"{Application.persistentDataPath}/{text}.json";
-            GameState.instance.CreateSaveFile(filePath);
+            SaveFile.CreateNew(filePath);
             InstantiateSaveFileInstanceUI(filePath);
             newSaveFileNameInput.text = "";
         });
@@ -48,7 +48,7 @@ public class SaveFileMenu : MonoBehaviour {
         var instance = Instantiate(saveFileInstanceUIPrefab,saveFileInstanceUIParent);
         instance.saveFileNameText.text = Path.GetFileNameWithoutExtension(filePath);
         instance.loadSaveFileButton.onClick.AddListener(() => {
-            GameState.instance.LoadGameSaveData(filePath);
+            SaveFile.Load(filePath);
             playMenu.gameObject.SetActive(true);
             gameObject.SetActive(false);
         });
