@@ -41,7 +41,7 @@ public class Tank : MonoBehaviour {
     }
 
     public virtual void SwitchGun(TankGun gunPrefab) {
-        if(CurrentGun) Destroy(CurrentGun);
+        if(CurrentGun) Destroy(CurrentGun.gameObject);
         CurrentGun = Instantiate(gunPrefab,gunSpawnPoint.position,gunFixRotation,gunSpawnPoint);
         BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);
     }

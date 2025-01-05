@@ -64,6 +64,14 @@ public class PlayerTank : Tank {
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
+        if(Input.GetKeyDown(KeyCode.Alpha1)) {
+            SwitchGun(ReferenceHub.instance.machineGunPrefab);
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha2)) {
+            if(SaveFile.GetUpgradeLevel(ReferenceHub.instance.shotGunPrefab.upgradeName) > 0) {
+                SwitchGun(ReferenceHub.instance.shotGunPrefab);
+            }
+        }
         if(Input.GetKey(KeyCode.Mouse0)) CurrentGun.Shoot();
         float moveStep = Time.fixedDeltaTime * Time.timeScale;
         float moveX = 0f;

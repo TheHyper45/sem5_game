@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class ReferenceHub : MonoBehaviour {
     public TankGun machineGunPrefab;
+    public TankGun shotGunPrefab;
     public Bullet bulletPrefab;
     public MoneyPickup moneyPickupPrefab;
     public LevelCompletedMenu levelCompletedMenuPrefab;
