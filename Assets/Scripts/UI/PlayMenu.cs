@@ -38,21 +38,24 @@ public class PlayMenu : MonoBehaviour {
     }
 
     private void OnEnable() {
-        bool firstLevelCompleted = false;
-        foreach(var button in levelSelectButtons) {
+        bool prevLevelCompleted = false;
+        for(int i = 0;i < levelSelectButtons.Length;i += 1) {
+            var button = levelSelectButtons[i];
             var data = SaveFile.GetLevelData(button.levelName);
             if(button.levelName == "Level1") {
-                firstLevelCompleted = data.completed;
-                button.button.interactable = true;
-                button.starImage.enabled = firstLevelCompleted;
-            }
-            else if(!firstLevelCompleted) {
-                button.button.interactable = false;
-                button.starImage.enabled = false;
-            }
-            else {
                 button.button.interactable = true;
                 button.starImage.enabled = data.completed;
+                prevLevelCompleted = data.completed;
+            }
+            else if(prevLevelCompleted) {
+                button.button.interactable = true;
+                button.starImage.enabled = data.completed;
+                prevLevelCompleted = data.completed;
+            }
+            else {
+                button.button.interactable = false;
+                button.starImage.enabled = false;
+                prevLevelCompleted = data.completed;
             }
         }
     }

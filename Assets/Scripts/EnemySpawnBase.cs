@@ -19,10 +19,13 @@ public class EnemySpawnBase : MonoBehaviour {
     [SerializeField]
     private float tankSpawnTime;
     [SerializeField]
+    private int maxSpawnTankCount;
+    [SerializeField]
     private SpawnPoint[] spawnPoints;
 
     private int health;
     private float timer = 0f;
+    private int spawnedTankCount = 0;
     public static readonly List<EnemySpawnBase> spawnBases = new();
 
     private void Awake() {
@@ -39,10 +42,12 @@ public class EnemySpawnBase : MonoBehaviour {
     }
 
     private void SpawnTank() {
+        if(spawnedTankCount >= maxSpawnTankCount && maxSpawnTankCount >= 0) return;
         for(int i = 0;i < spawnPoints.Length;i += 1) {
             var point = spawnPoints[i];
             if(point.spawnedTank) continue;
             point.spawnedTank = Instantiate(spawnTankPrefab,point.point.position,Quaternion.identity);
+            spawnedTankCount += 1;
             return;
         }
     }

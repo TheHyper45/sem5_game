@@ -3,8 +3,26 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyTank : Tank {
+    [SerializeField]
+    protected float incrementRoundsPerSecond;
+    [SerializeField]
+    protected int incrementDamage;
+    [SerializeField]
+    private TankGun currentGunPrefab;
+
     private NavMeshPath path = null;
     private int currentPathPointIndex = 0;
+
+    public override void SwitchGun(TankGun gunPrefab) {
+        base.SwitchGun(gunPrefab);
+        CurrentGun.baseRoundsPerSecond += incrementRoundsPerSecond;
+        CurrentGun.baseDamage += incrementDamage;
+    }
+
+    protected override void Awake() {
+        base.Awake();
+        SwitchGun(currentGunPrefab ? currentGunPrefab : ReferenceHub.instance.machineGunPrefab);
+    }
 
     protected override void FixedUpdate() {
         if(health <= 0) {

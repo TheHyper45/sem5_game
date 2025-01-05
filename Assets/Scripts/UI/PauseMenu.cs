@@ -24,6 +24,7 @@ public class PauseMenu : MonoBehaviour {
         });
         leaveButton.onClick.AddListener(() => {
             Time.timeScale = 1.0f;
+            SaveFile.AddMoney(GameState.instance.playerCollectedMoney);
             SceneManager.LoadScene("MainMenu");
         });
     }

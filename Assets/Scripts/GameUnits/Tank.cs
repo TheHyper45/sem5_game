@@ -29,8 +29,6 @@ public class Tank : MonoBehaviour {
     protected virtual void Awake() {
         Rigidbody = GetComponent<Rigidbody>();
         BulletIgnoreColliders = GetComponentsInChildren<Collider>(true);
-        SwitchGun(ReferenceHub.instance.machineGunPrefab);
-        BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);
     }
 
     protected virtual void Start() {
@@ -42,7 +40,7 @@ public class Tank : MonoBehaviour {
 
     }
 
-    public void SwitchGun(TankGun gunPrefab) {
+    public virtual void SwitchGun(TankGun gunPrefab) {
         if(CurrentGun) Destroy(CurrentGun);
         CurrentGun = Instantiate(gunPrefab,gunSpawnPoint.position,gunFixRotation,gunSpawnPoint);
         BulletGunIgnoreColliders = CurrentGun.GetComponentsInChildren<Collider>(true);

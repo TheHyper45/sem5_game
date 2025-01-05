@@ -687,6 +687,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseRoundsPerSecond: 5
   baseDamage: 7
+  baseBulletLifetime: 0.3
+  upgradeName: Machine Gun
   cannons:
   - bulletSpawnPoint: {fileID: 1734349118893364697}
     recoilMovePoint: {fileID: 5895957262090005082}

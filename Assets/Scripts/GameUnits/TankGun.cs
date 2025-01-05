@@ -1,10 +1,11 @@
 using UnityEngine;
 
 public class TankGun : MonoBehaviour {
+    public float baseRoundsPerSecond;
+    public int baseDamage;
     [SerializeField]
-    protected float baseRoundsPerSecond;
-    [SerializeField]
-    protected int baseDamage;
+    protected float baseBulletLifetime;
+    public string upgradeName;
 
     public float ShootCooldown { get; protected set; } = float.MaxValue;
     protected Tank parentDrivableUnit;

@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour {
     private int damage;
+    private float lifetimeInSeconds;
     private new Rigidbody rigidbody;
     private bool startTimer = false;
     private float timer = 0f;
@@ -16,12 +17,13 @@ public class Bullet : MonoBehaviour {
     private void FixedUpdate() {
         if(!startTimer) return;
         timer += Time.fixedDeltaTime;
-        if(timer >= 0.333f) Destroy(gameObject);
+        if(timer >= lifetimeInSeconds) Destroy(gameObject);
     }
 
-    public void Init(int _damage,Collider[] parentIgnoreColliders,Collider[] parentIgnoreColliders2) {
+    public void Init(int _damage,float _lifetimeInSeconds,Collider[] parentIgnoreColliders,Collider[] parentIgnoreColliders2) {
         if(startTimer) return;
         damage = _damage;
+        lifetimeInSeconds = _lifetimeInSeconds;
         startTimer = true;
         rigidbody.AddForce(transform.forward * 30f,ForceMode.VelocityChange);
         if(parentIgnoreColliders != null) {
@@ -46,7 +48,7 @@ public class Bullet : MonoBehaviour {
         }
         else if(collision.gameObject.TryGetComponent(out DestroyableBlock destroyableBlock)) {
             var dir = transform.forward;
-            dir.y = 0.5f;
+            dir.y = 1f;
             destroyableBlock.Hit(damage,dir,10f);
         }
         Destroy(gameObject);

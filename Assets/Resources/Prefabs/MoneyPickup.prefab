@@ -122,3 +122,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotateSpeed: 2
+  randomMin: 2
+  randomMax: 4
+  randomMultiplier: 5

@@ -48,13 +48,10 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
         preview.camera.fieldOfView = 60f;
         RestoreCameraTransform();
 
-        GameObject light = new("SunLight");
-        light.transform.SetPositionAndRotation(new(0f,3f,0f),Quaternion.Euler(50f,-30f,0f));
-        var lightComponent = light.AddComponent<Light>();
-        lightComponent.type = LightType.Directional;
-        lightComponent.intensity = 1f;
-        lightComponent.color = new(1f,244f / 255f,214f / 255f,1f);
-        preview.AddSingleGO(light);
+        preview.lights[0].intensity = 1.0f;
+        preview.lights[0].type = LightType.Directional;
+        preview.lights[0].transform.rotation = Quaternion.Euler(50f,-30f,0f);
+        preview.lights[1].intensity = 0.0f;
 
         if(!terrainMaterial) {
             editTerrainSizeX = 16;
@@ -97,8 +94,12 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
         }
 
         Rect pos = new(0,0,position.width,position.height);
-        preview.BeginPreview(pos,EditorStyles.helpBox);
-        preview.Render(true,false);
+        preview.BeginPreview(pos,GUIStyle.none);
+
+        var useScriptableRenderPipeline = Unsupported.useScriptableRenderPipeline;
+        Unsupported.useScriptableRenderPipeline = true;
+        preview.camera.Render();
+        Unsupported.useScriptableRenderPipeline = useScriptableRenderPipeline;
 
         using(new Handles.DrawingScope(Matrix4x4.identity)) {
             Handles.SetCamera(preview.camera);
@@ -112,7 +113,16 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
                 if(selectedTile.x < 0 || selectedTile.z < 0) {
                     var py = terrainData.GetHeight(px,pz);
                     Handles.DrawWireCube(new(px + 0.5f,py,pz + 0.5f),new(1f,0f,1f));
+                    Handles.Label(new(px + 0.5f,py,pz + 0.5f),$"x: {px},z: {pz}");
                     if(leftMouseButtonPressed) selectedTile = new() { x = px,z = pz };
+                }
+                else if(!leftMouseButtonPressed) {
+                    var py = terrainData.GetHeight(px,pz);
+                    using(new Handles.DrawingScope(Matrix4x4.identity)) {
+                        Handles.color = Color.yellow;
+                        Handles.DrawWireCube(new(px + 0.5f,py,pz + 0.5f),new(1f,0f,1f));
+                        Handles.Label(new(px + 0.5f,py,pz + 0.5f),$"x: {px},z: {pz}");
+                    }
                 }
                 else if(leftMouseButtonPressed && Event.current.control) {
                     var index = nextSelectedTiles.FindIndex((point) => point.x == px && point.z == pz);
@@ -156,8 +166,8 @@ public class SimpleTerrainBuilderWindow : EditorWindow {
             }
             Handles.PositionHandle(new(-1f,0f,-1f),Quaternion.identity);
         }
-
         preview.EndAndDrawPreview(pos);
+
         if(GUILayout.Button("Reset Camera",GUILayout.ExpandWidth(false))) {
             RestoreCameraTransform();
         }

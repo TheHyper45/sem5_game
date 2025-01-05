@@ -51,6 +51,7 @@ MonoBehaviour:
   maxHealth: 30
   spawnTankPrefab: {fileID: 8944598510685428264, guid: 78986446b87be2e408f98595ffec20b8, type: 3}
   tankSpawnTime: 10
+  maxSpawnTankCount: 20
   spawnPoints: []
 --- !u!65 &1978671523188123466
 BoxCollider:

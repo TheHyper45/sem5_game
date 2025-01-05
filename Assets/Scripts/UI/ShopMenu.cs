@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Globalization;
 
 public class ShopMenu : MonoBehaviour {
     [SerializeField]
@@ -25,18 +24,22 @@ public class ShopMenu : MonoBehaviour {
     }
 
     private void OnEnable() {
-        var moneyString = SaveFile.GetMoney().ToString(CultureInfo.InvariantCulture);
-        moneyText.text = $"Money: ${moneyString}";
-
+        moneyText.text = $"Money: ${SaveFile.GetMoney()}";
         foreach(var element in shopUpgradeInstanceUIParent.GetComponentsInChildren<ShopUpgradeInstanceUI>()) {
             Destroy(element.gameObject);
         }
-        for(int i = 0;i < 3;i += 1) {
-            InstantiateShopUpgradeInstanceUI();
+        foreach(var upgrade in ShopUpgrades.upgrades) {
+            InstantiateShopUpgradeInstanceUI(upgrade);
         }
     }
 
-    private void InstantiateShopUpgradeInstanceUI() {
+    private void InstantiateShopUpgradeInstanceUI(ShopUpgradeDescription shopUpgrade) {
         var instance = Instantiate(shopUpgradeInstanceUIPrefab,shopUpgradeInstanceUIParent);
+        instance.Init(shopUpgrade.label);
+        instance.buyButton.onClick.AddListener(() => {
+            SaveFile.BuyUpgrade(shopUpgrade.label);
+            instance.Init(shopUpgrade.label);
+            moneyText.text = $"Money: ${SaveFile.GetMoney()}";
+        });
     }
 }

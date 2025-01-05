@@ -6,15 +6,15 @@ using System.Collections.Generic;
 [Serializable]
 public struct GameSaveDataJson {
     [Serializable]
-    public struct UpgradeDataJson {
-        public string name;
-        public int level;
-    }
-    [Serializable]
     public struct LevelDataJson {
         public string name;
         public bool completed;
         public int score;
+    }
+    [Serializable]
+    public struct UpgradeDataJson {
+        public string name;
+        public int level;
     }
     public List<LevelDataJson> levelDatas;
     public List<UpgradeDataJson> upgradeDatas;
@@ -47,13 +47,13 @@ public static class SaveFile {
         }
     }
 
-    private static void Save() {
-        File.WriteAllText(saveFilePath,JsonUtility.ToJson(gameSaveDataJson));
-    }
-
     public static void Unload() {
         gameSaveDataJson = new();
         saveFilePath = "";
+    }
+
+    private static void Save() {
+        File.WriteAllText(saveFilePath,JsonUtility.ToJson(gameSaveDataJson));
     }
 
     public static bool IsLoaded() {
@@ -67,15 +67,6 @@ public static class SaveFile {
     public static void AddMoney(int amount) {
         gameSaveDataJson.money += amount;
         Save();
-    }
-
-    public static bool TakeMoney(int amount) {
-        if(gameSaveDataJson.money >= amount) {
-            gameSaveDataJson.money -= amount;
-            Save();
-            return true;
-        }
-        return false;
     }
 
     public static GameSaveDataJson.LevelDataJson GetLevelData(string levelName) {
@@ -97,6 +88,41 @@ public static class SaveFile {
         data.score = score;
         gameSaveDataJson.levelDatas[index] = data;
         gameSaveDataJson.money += moneyIncrement;
+        Save();
+    }
+
+    public static int GetUpgradeLevel(string upgradeName) {
+        var index = gameSaveDataJson.upgradeDatas.FindIndex((item) => item.name == upgradeName);
+        if(index < 0) return 0;
+        return Mathf.Clamp(gameSaveDataJson.upgradeDatas[index].level,0,ShopUpgrades.GetUpgradeDescription(upgradeName).levels.Length);
+    }
+
+    public static bool CanBuyUpgrade(string upgradeName) {
+        var upgradeDescription = ShopUpgrades.GetUpgradeDescription(upgradeName);
+        if(upgradeDescription == null) return false;
+        var upgradeLevel = GetUpgradeLevel(upgradeName);
+        if(upgradeLevel >= upgradeDescription.levels.Length) return false;
+        if(gameSaveDataJson.money < upgradeDescription.levels[upgradeLevel].cost) return false;
+        return true;
+    }
+
+    public static void BuyUpgrade(string upgradeName) {
+        if(!CanBuyUpgrade(upgradeName)) return;
+        var index = gameSaveDataJson.upgradeDatas.FindIndex((item) => item.name == upgradeName);
+        if(index < 0) {
+            GameSaveDataJson.UpgradeDataJson tmp2 = new() { name = upgradeName,level = 0 };
+            var upgrade2 = ShopUpgrades.GetUpgradeDescription(upgradeName).levels[tmp2.level];
+            tmp2.level += 1;
+            gameSaveDataJson.upgradeDatas.Add(tmp2);
+            gameSaveDataJson.money -= upgrade2.cost;
+            Save();
+            return;
+        }
+        var tmp = gameSaveDataJson.upgradeDatas[index];
+        var upgrade = ShopUpgrades.GetUpgradeDescription(upgradeName).levels[tmp.level];
+        tmp.level += 1;
+        gameSaveDataJson.upgradeDatas[index] = tmp;
+        gameSaveDataJson.money -= upgrade.cost;
         Save();
     }
 }

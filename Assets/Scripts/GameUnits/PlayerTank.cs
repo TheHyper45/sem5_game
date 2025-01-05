@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class PlayerTank : Tank {
@@ -12,6 +11,17 @@ public class PlayerTank : Tank {
 
     private bool setInstanceToNullOnDestruction = true;
 
+    public override void SwitchGun(TankGun gunPrefab) {
+        base.SwitchGun(gunPrefab);
+        if(string.IsNullOrEmpty(CurrentGun.upgradeName)) return;
+        var level = SaveFile.GetUpgradeLevel(CurrentGun.upgradeName);
+        if(level <= 0) return;
+        var machinGunUpgrade = ShopUpgrades.GetUpgradeDescription(CurrentGun.upgradeName).levels[level - 1];
+        var machinGunUpgradeInfo = (ShopMachineGunUpgradeValue)machinGunUpgrade.value;
+        CurrentGun.baseDamage += machinGunUpgradeInfo.damage;
+        CurrentGun.baseRoundsPerSecond += machinGunUpgradeInfo.roundsPerSecond; 
+    }
+
     protected override void Awake() {
         base.Awake();
         if(instance != null) {
@@ -20,6 +30,17 @@ public class PlayerTank : Tank {
             Debug.LogError("At most one instance of \"PlayerTank\" can exist at any given moment.");
         }
         else instance = this;
+        var speedUpgradeLevel = SaveFile.GetUpgradeLevel("Speed");
+        if(speedUpgradeLevel > 0) {
+            var speedUpgrade = ShopUpgrades.GetUpgradeDescription("Speed").levels[speedUpgradeLevel - 1];
+            baseMoveSpeed += (float)speedUpgrade.value;
+        }
+        var healthUpgradeLevel = SaveFile.GetUpgradeLevel("Health");
+        if(healthUpgradeLevel > 0) {
+            var healthUpgrade = ShopUpgrades.GetUpgradeDescription("Health").levels[healthUpgradeLevel - 1];
+            baseMaxHealth += (int)healthUpgrade.value;
+        }
+        SwitchGun(ReferenceHub.instance.machineGunPrefab);
     }
 
     private void OnDestroy() {
